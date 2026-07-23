@@ -467,7 +467,7 @@ async function fetchBaliWeather() {
   try {
     const url = "https://api.open-meteo.com/v1/forecast?latitude=-8.65&longitude=115.2167"
       + "&current=temperature_2m,weather_code"
-      + "&daily=weather_code,temperature_2m_max,temperature_2m_min,sunset"
+      + "&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset"
       + "&timezone=Asia%2FMakassar&forecast_days=3";
     const res = await fetch(url);
     if (!res.ok) throw new Error("HTTP " + res.status);
@@ -499,10 +499,12 @@ async function fetchBaliWeather() {
     containers.forEach((c) => (c.innerHTML = html));
 
     // 今夜の星空情報：日没時刻（Open-Meteo）＋ 月齢・月の満ち欠け（計算のみ、API不要）
+    const sunriseTime = json.daily.sunrise[0].slice(11, 16); // "2026-08-13T06:02" → "06:02"
     const sunsetTime = json.daily.sunset[0].slice(11, 16); // "2026-08-13T18:07" → "18:07"
     const moon = getMoonPhaseInfo(new Date());
     let stargazingHtml = '<div class="live-stargazing-inner">';
     stargazingHtml += '<p class="live-stargazing-title">🌌 今夜の星空情報</p>';
+    stargazingHtml += '<div class="live-stargazing-row"><span>🌅 日の出</span><span>' + sunriseTime + "</span></div>";
     stargazingHtml += '<div class="live-stargazing-row"><span>🌇 日没</span><span>' + sunsetTime + "</span></div>";
     stargazingHtml += '<div class="live-stargazing-row"><span>' + moon.icon + " " + moon.label + "</span><span>月明かり " + moon.illumination + "%</span></div>";
     stargazingHtml += '<p class="live-stargazing-note">月明かりが弱い日ほど、星がくっきり見えやすくなります。</p>';
