@@ -476,7 +476,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 
 /* topbarのすぐ下、白い余白部分に常設する3つのショートカットボタン */
 .shortcut-bar {
-  position: fixed; top: 66px; left: 0; right: 0; z-index: 199;
+  position: fixed; top: var(--topbar-h, 66px); left: 0; right: 0; z-index: 199;
   display: flex; justify-content: center; flex-wrap: wrap; gap: 8px;
   padding: 8px var(--space-m);
   background: rgba(243,234,217,.85);
@@ -573,7 +573,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 .bgm-hint.hidden { display: none; }
 
 .progress-bar {
-  position: fixed; top: 118px; left: 0; right: 0; z-index: 199;
+  position: fixed; top: var(--header-h, 118px); left: 0; right: 0; z-index: 199;
   height: 3px; background: rgba(34,52,58,.08);
 }
 .progress-fill {
@@ -583,11 +583,11 @@ ul { list-style: none; margin: 0; padding: 0; }
 }
 
 .slides-viewport {
-  flex: 1; margin-top: 121px; margin-bottom: 74px;
-  height: calc(100vh - 195px);
+  flex: 1; margin-top: calc(var(--header-h, 118px) + 3px); margin-bottom: 74px;
+  height: calc(100vh - var(--header-h, 118px) - 77px);
   /* スマホでアドレスバーの出し引きにより100vhが実際の表示領域より
      大きくなり、下部ナビに文章が隠れてしまうのを防ぐ（対応ブラウザのみ） */
-  height: calc(100dvh - 195px);
+  height: calc(100dvh - var(--header-h, 118px) - 77px);
   overflow: hidden; position: relative;
 }
 /* 高さ100%指定だと、レイアウトの都合で高さが0になってしまう場合があるため、
@@ -1255,10 +1255,9 @@ ul { list-style: none; margin: 0; padding: 0; }
   .current-chapter-label { display: none; }
   .topbar-right { gap: 2px; }
   .icon-btn { width: 38px; height: 38px; font-size: .9rem; }
-  .shortcut-bar { top: 58px; padding: 6px var(--space-s); gap: 6px; }
+  .shortcut-bar { padding: 6px var(--space-s); gap: 6px; }
   .shortcut-pill { padding: 7px 12px; font-size: .72rem; }
-  .progress-bar { top: 104px; }
-  .slides-viewport { margin-top: 107px; margin-bottom: 66px; height: calc(100vh - 173px); height: calc(100dvh - 173px); }
+  .slides-viewport { margin-bottom: 66px; height: calc(100vh - var(--header-h, 104px) - 69px); height: calc(100dvh - var(--header-h, 104px) - 69px); }
   .slide { padding: var(--space-m) var(--space-s); }
   .info-grid { grid-template-columns: repeat(2, 1fr); }
   .clothing-grid { grid-template-columns: 1fr; }
@@ -1277,11 +1276,8 @@ ul { list-style: none; margin: 0; padding: 0; }
   .topbar-logo { font-size: .72rem; }
   .icon-btn { width: 32px; height: 32px; font-size: .8rem; }
   .topbar-right { gap: 1px; overflow-x: auto; }
-  .shortcut-bar { top: 48px; }
   .shortcut-pill-text { display: none; }
   .shortcut-pill { padding: 8px; }
-  .progress-bar { top: 92px; }
-  .slides-viewport { margin-top: 95px; height: calc(100vh - 161px); height: calc(100dvh - 161px); }
 }
 
 /* ダークモード等での可読性のため、印刷時は非表示にする演出要素 */

@@ -306,8 +306,10 @@ function enterMainApp() {
   const app = document.getElementById("app");
   openingScreen.classList.add("is-hidden");
   app.classList.remove("app-hidden");
+  updateHeaderHeightVars();
   goToSlide(0, { instant: true });
   setTimeout(maybeShowBgmHint, 1200);
+  setTimeout(updateHeaderHeightVars, 400); // フォント読み込み後の高さ変化に追従
 }
 
 /* ============================================================
@@ -1510,6 +1512,18 @@ function setupOpeningEntry() {
   document.getElementById("btn-start-prologue").addEventListener("click", enterMainApp);
 }
 
+// topbar・shortcut-barの実際の高さをCSS変数に反映する。
+// ここをpx手打ちにすると、フォント表示や折り返しのわずかな違いで
+// ずれてチャプター下部が見えなくなるため、必ず実測値を使う。
+function updateHeaderHeightVars() {
+  const topbar = document.querySelector(".topbar");
+  const shortcutBar = document.querySelector(".shortcut-bar");
+  const topbarH = topbar ? topbar.offsetHeight : 0;
+  const shortcutBarH = shortcutBar ? shortcutBar.offsetHeight : 0;
+  document.documentElement.style.setProperty("--topbar-h", topbarH + "px");
+  document.documentElement.style.setProperty("--header-h", (topbarH + shortcutBarH) + "px");
+}
+
 async function init() {
   initStarfield();
   cacheOpeningEls();
@@ -1537,12 +1551,16 @@ async function init() {
   if (resumeIndex !== null) {
     document.getElementById("opening-screen").classList.add("is-hidden");
     document.getElementById("app").classList.remove("app-hidden");
+    updateHeaderHeightVars();
     goToSlide(resumeIndex, { instant: true });
     startBgmAutoplay();
     setTimeout(maybeShowBgmHint, 1200);
+    setTimeout(updateHeaderHeightVars, 400);
   } else {
     runOpeningSequence(data);
   }
+
+  window.addEventListener("resize", updateHeaderHeightVars);
 }
 
 document.addEventListener("DOMContentLoaded", init);
