@@ -491,6 +491,7 @@ async function fetchBaliWeather() {
       html += '<div class="live-weather-day">';
       html += '<span class="live-weather-day-label">' + (dayLabels[i] || "") + "</span>";
       html += '<span class="live-weather-day-icon">' + info.icon + "</span>";
+      html += '<span class="live-weather-day-desc">' + info.label + "</span>";
       html += '<span class="live-weather-day-temp">' + max + "° / " + min + "°</span>";
       html += "</div>";
     });
