@@ -829,13 +829,14 @@ function renderRouteMap(data) {
       });
     }
 
-    daysWrap.querySelectorAll("button").forEach((btn, i) => {
+    daysWrap.querySelectorAll("button.route-day-btn").forEach((btn, i) => {
       btn.classList.toggle("is-active", i === index);
     });
   }
 
   routeMap.route.forEach((dayInfo, index) => {
     const btn = document.createElement("button");
+    btn.className = "route-day-btn";
     btn.textContent = dayInfo.date.slice(5).replace("-", "/");
     btn.addEventListener("click", () => {
       selectDay(index);
@@ -843,6 +844,21 @@ function renderRouteMap(data) {
     });
     daysWrap.appendChild(btn);
   });
+
+  // 最終日（帰国日）の隣に、飛行機が飛び立つ演出付きの「帰国」ボタンを追加する
+  const lastIndex = routeMap.route.length - 1;
+  const departBtn = document.createElement("button");
+  departBtn.className = "route-depart-btn";
+  departBtn.textContent = "帰国 ✈️";
+  departBtn.addEventListener("click", () => {
+    selectDay(lastIndex);
+    dismissRouteDaysHint();
+    marker.classList.remove("is-departing");
+    void marker.offsetWidth; // アニメーションを毎回リスタートさせるためのリフロー
+    marker.classList.add("is-departing");
+    setTimeout(() => marker.classList.remove("is-departing"), 1700);
+  });
+  daysWrap.appendChild(departBtn);
 
   // 初期表示は1日目
   selectDay(0);

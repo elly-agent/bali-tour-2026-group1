@@ -1029,8 +1029,26 @@ ul { list-style: none; margin: 0; padding: 0; }
 .route-map-days button:nth-child(4) { animation-delay: .45s; }
 .route-map-days button:nth-child(5) { animation-delay: .6s; }
 .route-map-days button:nth-child(6) { animation-delay: .75s; }
+.route-map-days button:nth-child(7) { animation-delay: .9s; }
 @media (prefers-reduced-motion: reduce) {
   .route-map-days button { animation: none; }
+}
+
+/* 帰国日の隣の「帰国」ボタン。他の日付ボタンと区別できる黄〜オレンジ色にする */
+.route-depart-btn {
+  background: linear-gradient(120deg, #ffc266, #ff9800);
+  border-color: #ff9800; color: var(--color-white);
+}
+.route-depart-btn:hover { background: linear-gradient(120deg, #ffd28a, #ffa726); }
+
+/* 「帰国」ボタンを押すと、地図上の飛行機がそのまま飛び立って画面の外へ消えていく演出 */
+@keyframes route-marker-depart {
+  0%   { opacity: 1; }
+  20%  { opacity: 1; }
+  100% { transform: translate(-50%, -50%) rotate(var(--heading, -45deg)) translate(260px, -220px) scale(.2); opacity: 0; }
+}
+.route-current-marker.is-departing {
+  animation: route-marker-depart 1.6s cubic-bezier(.3, 0, .7, 1) forwards;
 }
 .route-map-current-label { font-weight: 600; color: var(--color-emerald); }
 .route-map-highlights { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
