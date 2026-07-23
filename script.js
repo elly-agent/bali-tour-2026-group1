@@ -801,13 +801,19 @@ function renderRouteMap(data) {
     marker.textContent = routeMap.legendIcons[dayInfo.transport].split(" ")[0];
     label.textContent = dayInfo.date + "　" + dayInfo.label;
 
-    // 進行方向（前後の点を結んだ角度）を計算し、絵文字が進む向きを向くように回転させる
-    const delta = Math.max(2, pathLength * 0.01);
-    const beforePt = path.getPointAtLength(Math.max(0, fraction * pathLength - delta));
-    const afterPt = path.getPointAtLength(Math.min(pathLength, fraction * pathLength + delta));
-    const angleDeg = Math.atan2(afterPt.y - beforePt.y, afterPt.x - beforePt.x) * 180 / Math.PI;
-    const baseAngle = TRANSPORT_BASE_ANGLE[dayInfo.transport] || 0;
-    marker.style.setProperty("--heading", (angleDeg - baseAngle) + "deg");
+    // 進行方向に合わせた回転は、向きが正しく見えている最終日（17日→18日）だけに適用する。
+    // それ以外の日は、絵文字の向きがおかしく見えたため元の(回転なし)表示に戻す。
+    const isLastDay = index === routeMap.route.length - 1;
+    if (isLastDay) {
+      const delta = Math.max(2, pathLength * 0.01);
+      const beforePt = path.getPointAtLength(Math.max(0, fraction * pathLength - delta));
+      const afterPt = path.getPointAtLength(Math.min(pathLength, fraction * pathLength + delta));
+      const angleDeg = Math.atan2(afterPt.y - beforePt.y, afterPt.x - beforePt.x) * 180 / Math.PI;
+      const baseAngle = TRANSPORT_BASE_ANGLE[dayInfo.transport] || 0;
+      marker.style.setProperty("--heading", (angleDeg - baseAngle) + "deg");
+    } else {
+      marker.style.setProperty("--heading", "0deg");
+    }
 
     // 移動した瞬間だけ、風になびくような線をさっと見せる
     marker.classList.remove("is-moving");
