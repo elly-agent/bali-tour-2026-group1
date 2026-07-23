@@ -1018,10 +1018,20 @@ ul { list-style: none; margin: 0; padding: 0; }
   background: var(--color-white); border: 2px solid var(--color-turquoise);
   color: var(--color-turquoise-deep); font-size: .82rem; font-weight: 700;
   box-shadow: 0 2px 8px rgba(0,0,0,.08);
-  transition: background var(--dur-fast) ease, color var(--dur-fast) ease, transform var(--dur-fast) ease;
+  transition: background var(--dur-fast) ease, color var(--dur-fast) ease, box-shadow var(--dur-fast) ease;
+  animation: shortcut-float 2.6s ease-in-out infinite;
 }
-.route-map-days button:hover { transform: translateY(-2px); }
+.route-map-days button:hover { box-shadow: 0 6px 16px rgba(0,0,0,.16); animation-play-state: paused; }
 .route-map-days button.is-active { background: var(--color-turquoise); color: var(--color-white); }
+.route-map-days button:nth-child(1) { animation-delay: 0s; }
+.route-map-days button:nth-child(2) { animation-delay: .15s; }
+.route-map-days button:nth-child(3) { animation-delay: .3s; }
+.route-map-days button:nth-child(4) { animation-delay: .45s; }
+.route-map-days button:nth-child(5) { animation-delay: .6s; }
+.route-map-days button:nth-child(6) { animation-delay: .75s; }
+@media (prefers-reduced-motion: reduce) {
+  .route-map-days button { animation: none; }
+}
 .route-map-current-label { font-weight: 600; color: var(--color-emerald); }
 .route-map-highlights { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 .route-map-highlight-chip {
