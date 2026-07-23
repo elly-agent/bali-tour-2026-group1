@@ -1093,13 +1093,17 @@ ul { list-style: none; margin: 0; padding: 0; }
   color: var(--color-white);
   font-size: .82rem; font-weight: 600; letter-spacing: .04em;
   box-shadow: 0 8px 24px rgba(0,0,0,.2);
-  transition: transform var(--dur-fast) var(--ease-soft), box-shadow var(--dur-fast) var(--ease-soft);
+  transition: box-shadow var(--dur-fast) var(--ease-soft);
+  animation: shortcut-float 2.6s ease-in-out infinite;
 }
-.opa-daily-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,.28); }
+.opa-daily-btn:hover { box-shadow: 0 12px 30px rgba(0,0,0,.28); animation-play-state: paused; }
 .opa-daily-btn-icon { font-size: 1.1rem; }
+@media (prefers-reduced-motion: reduce) {
+  .opa-daily-btn { animation: none; }
+}
 
-/* ボタンを押した瞬間、ふわっと光るアニメーション */
-.opa-daily-btn.is-glowing { animation: opa-glow .9s var(--ease-soft); }
+/* ボタンを押した瞬間、ふわっと光るアニメーション（常時の浮遊アニメーションに重ねて再生する） */
+.opa-daily-btn.is-glowing { animation: shortcut-float 2.6s ease-in-out infinite, opa-glow .9s var(--ease-soft); }
 @keyframes opa-glow {
   0%   { box-shadow: 0 8px 24px rgba(0,0,0,.2); filter: brightness(1); }
   35%  { box-shadow: 0 0 34px 12px rgba(255,255,255,.85); filter: brightness(1.4); }
