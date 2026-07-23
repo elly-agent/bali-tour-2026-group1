@@ -366,7 +366,7 @@ ul { list-style: none; margin: 0; padding: 0; }
   opacity: 0; animation: fade-up-title 1.2s var(--ease-soft) forwards;
 }
 .prologue-logo-img {
-  width: clamp(32px, 7vh, 68px); height: clamp(32px, 7vh, 68px); object-fit: contain;
+  width: clamp(24px, 5vh, 48px); height: clamp(24px, 5vh, 48px); object-fit: contain;
   filter: drop-shadow(0 4px 16px rgba(0,0,0,.35));
 }
 /* 中央のテーマ・目的・効果は、文字サイズを画面の高さに応じて自動で縮める(clamp)。
@@ -375,7 +375,7 @@ ul { list-style: none; margin: 0; padding: 0; }
    スクロールバー自体は目立たない薄い見た目にしている。 */
 .prologue-scroll {
   flex: 1 1 auto; min-height: 0; width: 100%;
-  overflow-y: auto;
+  overflow-y: auto; position: relative;
   scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.3) transparent;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
@@ -388,12 +388,16 @@ ul { list-style: none; margin: 0; padding: 0; }
   opacity: 0; animation: fade-up-title 1.2s var(--ease-soft) forwards;
 }
 .prologue-eyebrow.hidden { margin-bottom: 0; }
+/* テーマ・目的・効果は、ひとつずつ順番に画面に現れては消えるように、
+   同じ場所に重ねて配置し、JS側で表示するブロックを切り替える。 */
 .prologue-block {
-  margin-bottom: clamp(10px, 3vh, var(--space-l));
-  opacity: 0; animation: fade-up-title 1.2s var(--ease-soft) forwards;
+  position: absolute; inset: 0; width: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transform: translateY(16px);
+  transition: opacity 1.1s var(--ease-soft), transform 1.1s var(--ease-soft), visibility 1.1s;
 }
-.prologue-block:nth-of-type(2) { animation-delay: .25s; }
-.prologue-block:nth-of-type(3) { animation-delay: .5s; }
+.prologue-block.is-visible { opacity: 1; visibility: visible; pointer-events: auto; transform: translateY(0); }
 .prologue-label {
   font-family: var(--font-heading); font-size: clamp(.95rem, 2.6vh, 1.25rem); font-weight: 700; letter-spacing: .2em;
   color: var(--color-turquoise); margin-bottom: clamp(6px, 1.5vh, 14px);
@@ -402,10 +406,15 @@ ul { list-style: none; margin: 0; padding: 0; }
   font-family: var(--font-heading); font-size: clamp(1rem, 3.4vh, 1.42rem); line-height: 1.5; letter-spacing: .03em;
   color: var(--color-white);
 }
+/* 3つのメッセージを読み終えたら、旅を始めるボタンだけが画面の中央に浮かぶ状態にする */
+.opening-prologue.is-cta { justify-content: center; }
+.opening-prologue.is-cta .prologue-scroll { display: none; }
 .opening-prologue .btn-primary {
   flex: none; margin-top: clamp(8px, 2vh, var(--space-m)); margin-bottom: 0;
-  opacity: 0; animation: fade-up-title 1.2s var(--ease-soft) forwards .75s;
+  opacity: 0; transform: translateY(16px);
+  transition: opacity 1.1s var(--ease-soft), transform 1.1s var(--ease-soft);
 }
+.opening-prologue .btn-primary.is-visible { opacity: 1; transform: translateY(0); }
 
 @media (max-width: 480px) {
   .opening-prologue { padding: clamp(16px, 4vh, var(--space-m)) var(--space-s); }

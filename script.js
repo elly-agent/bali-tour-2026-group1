@@ -1093,6 +1093,39 @@ function renderPrologue(data) {
   document.getElementById("btn-start-prologue").textContent = p.buttonLabel;
 }
 
+// テーマ→目的→効果の順に、ひとつずつ画面に浮かび上がっては消える演出。
+// 最後まで読み終えたら、「旅を始める」ボタンだけが画面の中央に現れる。
+let prologueTimers = [];
+function runPrologueSequence() {
+  prologueTimers.forEach((t) => clearTimeout(t));
+  prologueTimers = [];
+
+  const prologueEl = openingEls.prologue;
+  const blocks = Array.from(document.querySelectorAll("#opening-prologue .prologue-block"));
+  const startBtn = document.getElementById("btn-start-prologue");
+
+  prologueEl.classList.remove("is-cta");
+  blocks.forEach((b) => b.classList.remove("is-visible"));
+  startBtn.classList.remove("is-visible");
+
+  const READ_TIME = 3200;
+  let delay = 500;
+  blocks.forEach((block) => {
+    prologueTimers.push(setTimeout(() => {
+      blocks.forEach((b) => b.classList.remove("is-visible"));
+      block.classList.add("is-visible");
+    }, delay));
+    delay += READ_TIME;
+  });
+  prologueTimers.push(setTimeout(() => {
+    blocks.forEach((b) => b.classList.remove("is-visible"));
+  }, delay));
+  prologueTimers.push(setTimeout(() => {
+    prologueEl.classList.add("is-cta");
+    startBtn.classList.add("is-visible");
+  }, delay + 900));
+}
+
 function renderAllChapters(data) {
   applyDataBindings(data);
   renderPrologue(data);
@@ -1362,11 +1395,29 @@ function closeChapterMenu() {
    ============================================================ */
 
 // オープニングで飛行機が飛び立つ瞬間に鳴らす効果音
-function playTakeoffSfx() {
-  const sfx = document.getElementById("sfx-plane");
+// スマホ(特にiOS Safari)は「操作(タップ)から間を置いて呼び出したplay()」を
+// ブロックすることがある。オープニング演出は最初のクリックから数秒後に効果音を
+// 鳴らすため、ブロックされた場合は次のタップ/クリックで鳴らし直す（BGMと同じ仕組み）。
+function playSfxWithUnlockRetry(sfx, volume) {
   sfx.currentTime = 0;
-  sfx.volume = 0.7;
-  sfx.play().catch(() => {});
+  sfx.volume = volume;
+  const playPromise = sfx.play();
+  if (playPromise && playPromise.catch) {
+    playPromise.catch(() => {
+      const retry = () => {
+        sfx.currentTime = 0;
+        sfx.play().catch(() => {});
+        document.removeEventListener("click", retry);
+        document.removeEventListener("touchstart", retry);
+      };
+      document.addEventListener("click", retry, { once: true });
+      document.addEventListener("touchstart", retry, { once: true });
+    });
+  }
+}
+
+function playTakeoffSfx() {
+  playSfxWithUnlockRetry(document.getElementById("sfx-plane"), 0.7);
 }
 
 // 飛行機が画面を飛んでいる間、ずっと流れる「飛行音」
@@ -1376,9 +1427,7 @@ function playFlyingSfx() {
     clearInterval(flyingSfxFadeTimer);
     flyingSfxFadeTimer = null;
   }
-  sfx.currentTime = 0;
-  sfx.volume = 0.6;
-  sfx.play().catch(() => {});
+  playSfxWithUnlockRetry(sfx, 0.6);
 }
 let flyingSfxFadeTimer = null;
 function stopFlyingSfx() {
@@ -1713,6 +1762,8 @@ function setupNavigationEvents() {
 
 function resetOpeningVisuals() {
   stopFlyingSfx();
+  prologueTimers.forEach((t) => clearTimeout(t));
+  prologueTimers = [];
   openingEls.earthScene.classList.remove("is-fading");
   openingEls.japanGlow.classList.remove("is-lit");
   openingEls.baliGlow.classList.remove("is-lit");
@@ -1733,6 +1784,7 @@ function setupOpeningEntry() {
   document.getElementById("btn-start-experience").addEventListener("click", () => {
     openingEls.title.classList.add("hidden");
     openingEls.prologue.classList.remove("hidden");
+    runPrologueSequence();
   });
   document.getElementById("btn-start-prologue").addEventListener("click", enterMainApp);
 }
