@@ -757,6 +757,24 @@ ul { list-style: none; margin: 0; padding: 0; }
   font-size: .85rem; color: var(--color-ink); padding: 4px 0;
 }
 .live-stargazing-note { font-size: .74rem; color: var(--color-ink-soft); margin-top: 6px; }
+
+/* 星座ガイド（目安のイラスト） */
+.constellation-guide {
+  margin-top: var(--space-s); padding-top: var(--space-s);
+  border-top: 1px solid var(--color-sand-dark);
+}
+.constellation-guide-title { font-weight: 700; color: var(--color-ink); margin-bottom: 8px; font-size: .9rem; }
+.constellation-svg {
+  width: 100%; height: auto; border-radius: var(--radius-m); display: block; margin-bottom: 10px;
+}
+.constellation-horizon { stroke: rgba(255,255,255,.35); stroke-width: 1; }
+.constellation-direction { fill: rgba(255,255,255,.6); font-size: 11px; text-anchor: middle; }
+.constellation-mark circle { fill: #fff; }
+.constellation-mark polyline, .constellation-mark line { stroke: rgba(255,255,255,.7); stroke-width: 1.5; }
+.constellation-label { fill: var(--color-gold-soft); font-size: 12px; font-weight: 700; text-anchor: middle; }
+.constellation-list { list-style: none; padding: 0; margin: 0; font-size: .82rem; color: var(--color-ink); line-height: 1.6; }
+.constellation-list li { margin-bottom: 4px; }
+.constellation-note { font-size: .72rem; color: var(--color-ink-soft); margin-top: 8px; }
 .stat-label { font-size: .8rem; color: var(--color-ink-soft); }
 .stat-value { font-weight: 600; color: var(--color-turquoise-deep); }
 
