@@ -49,7 +49,7 @@ html, body {
   padding: 0;
   width: 100%;
   height: 100%;
-  overflow-x: hidden;
+  overflow: hidden;
   background: var(--color-sand);
   color: var(--color-ink);
   font-family: var(--font-body);
@@ -375,8 +375,12 @@ ul { list-style: none; margin: 0; padding: 0; }
 .prologue-scroll {
   flex: 1 1 auto; min-height: 0; width: 100%;
   overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.3) transparent;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
+.prologue-scroll::-webkit-scrollbar { width: 4px; }
+.prologue-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.3); border-radius: 999px; }
+.prologue-scroll::-webkit-scrollbar-track { background: transparent; }
 .prologue-eyebrow {
   font-size: .82rem; letter-spacing: .26em; color: var(--color-gold-soft);
   margin-bottom: var(--space-l);
@@ -405,6 +409,14 @@ ul { list-style: none; margin: 0; padding: 0; }
   .prologue-text { font-size: 1.18rem; line-height: 1.7; }
   .prologue-block { margin-bottom: var(--space-m); }
   .prologue-logo-img { width: 48px; height: 48px; }
+}
+
+@media (max-width: 480px) {
+  .prologue-text { font-size: 1.1rem; line-height: 1.6; }
+  .prologue-label { font-size: .92rem; margin-bottom: 10px; }
+  .prologue-block { margin-bottom: var(--space-s); }
+  .prologue-eyebrow { margin-bottom: var(--space-m); }
+  .prologue-logo-img { width: 44px; height: 44px; }
 }
 
 .btn-primary, .btn-secondary {
@@ -1088,45 +1100,6 @@ ul { list-style: none; margin: 0; padding: 0; }
   100% { opacity: 0; background-position: 100% 50%; }
 }
 
-/* 天気・時間への常設ショートカット。3つのボタンの中でいちばん下（ナビの上）に配置する */
-.weather-shortcut {
-  position: fixed; right: var(--space-m); bottom: 86px; z-index: 195;
-  display: flex; align-items: center; gap: 6px;
-  background: var(--color-emerald); color: var(--color-white);
-  padding: 10px 16px; border-radius: 999px; font-size: .82rem; font-weight: 600;
-  letter-spacing: .02em; box-shadow: 0 6px 18px rgba(0,0,0,.25);
-  border: none; cursor: pointer;
-  transition: transform var(--dur-fast) ease, background var(--dur-fast) ease;
-}
-.weather-shortcut:hover { transform: translateY(-2px); }
-.weather-shortcut-icon { font-size: 1rem; }
-
-/* 旅行中いちばん使う「今日の予定」への常設ショートカット。天気ボタンのすぐ上に配置する */
-.today-shortcut {
-  position: fixed; right: var(--space-m); bottom: 138px; z-index: 195;
-  display: flex; align-items: center; gap: 6px;
-  background: var(--color-turquoise-deep); color: var(--color-white);
-  padding: 10px 16px; border-radius: 999px; font-size: .82rem; font-weight: 600;
-  letter-spacing: .02em; box-shadow: 0 6px 18px rgba(0,0,0,.25);
-  border: none; cursor: pointer;
-  transition: transform var(--dur-fast) ease, background var(--dur-fast) ease;
-}
-.today-shortcut:hover { transform: translateY(-2px); background: var(--color-turquoise); }
-.today-shortcut-icon { font-size: 1rem; }
-
-/* BGM変更への常設ショートカット。「今日の予定」ボタンのすぐ上に配置する */
-.bgm-shortcut {
-  position: fixed; right: var(--space-m); bottom: 190px; z-index: 195;
-  display: flex; align-items: center; gap: 6px;
-  background: var(--color-gold); color: var(--color-white);
-  padding: 10px 16px; border-radius: 999px; font-size: .82rem; font-weight: 600;
-  letter-spacing: .02em; box-shadow: 0 6px 18px rgba(0,0,0,.25);
-  border: none; cursor: pointer;
-  transition: transform var(--dur-fast) ease, background var(--dur-fast) ease;
-}
-.bgm-shortcut:hover { transform: translateY(-2px); }
-.bgm-shortcut-icon { font-size: 1rem; }
-
 /* ------------------------------------------------------------
    8. ナビゲーション・チャプターメニュー・ライトボックス
    ------------------------------------------------------------ */
@@ -1261,9 +1234,6 @@ ul { list-style: none; margin: 0; padding: 0; }
   .nav-btn { padding: 9px 14px; font-size: .8rem; }
   .bargain-bubble { max-width: 88%; }
   .price-list-grid { grid-template-columns: 1fr; }
-  .weather-shortcut { right: var(--space-s); padding: 9px 12px; font-size: .74rem; }
-  .today-shortcut { right: var(--space-s); padding: 9px 12px; font-size: .74rem; }
-  .bgm-shortcut { right: var(--space-s); padding: 9px 12px; font-size: .74rem; }
 }
 
 /* 横幅がさらに狭い機種向け(iPhone SEなど）: ボタンがはみ出さないようもう一段階小さくする */
@@ -1272,10 +1242,6 @@ ul { list-style: none; margin: 0; padding: 0; }
   .topbar-logo { font-size: .72rem; }
   .icon-btn { width: 32px; height: 32px; font-size: .8rem; }
   .topbar-right { gap: 1px; overflow-x: auto; }
-  .today-shortcut-text { display: none; }
-  .today-shortcut { padding: 9px; }
-  .bgm-shortcut-text { display: none; }
-  .bgm-shortcut { padding: 9px; }
 }
 
 /* ダークモード等での可読性のため、印刷時は非表示にする演出要素 */

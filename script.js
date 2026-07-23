@@ -1386,7 +1386,6 @@ function setupNavigationEvents() {
   document.getElementById("btn-menu").addEventListener("click", openChapterMenu);
   document.getElementById("btn-close-menu").addEventListener("click", closeChapterMenu);
   document.getElementById("btn-bgm").addEventListener("click", () => toggleBgmMenu("btn-bgm"));
-  document.getElementById("btn-bgm-shortcut").addEventListener("click", () => toggleBgmMenu("btn-bgm-shortcut"));
   document.getElementById("bgm-menu-onoff").addEventListener("click", toggleBgm);
   document.getElementById("btn-autoplay").addEventListener("click", toggleAutoplay);
   document.getElementById("btn-fullscreen").addEventListener("click", toggleFullscreen);
@@ -1476,10 +1475,8 @@ function setupNavigationEvents() {
   // BGMメニューの外側をクリック/タップしたら閉じる
   document.addEventListener("click", (event) => {
     const bgmControl = document.querySelector(".bgm-control");
-    const bgmShortcut = document.getElementById("btn-bgm-shortcut");
     const inControl = bgmControl && bgmControl.contains(event.target);
-    const inShortcut = bgmShortcut && bgmShortcut.contains(event.target);
-    if (!inControl && !inShortcut) closeBgmMenu();
+    if (!inControl) closeBgmMenu();
   });
 }
 
