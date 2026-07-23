@@ -343,7 +343,7 @@
       { "date": "2026-08-15", "label": "ウブド周辺", "place": "ウブド周辺", "transport": "car" },
       { "date": "2026-08-16", "label": "サヌール → レンボンガン島", "place": "レンボンガン島", "transport": "ferry" },
       { "date": "2026-08-17", "label": "レンボンガン島 → ヌサドゥア", "place": "ヌサドゥア", "transport": "ferry" },
-      { "date": "2026-08-18", "label": "デンパサール → 日本", "place": "日本（帰国）", "transport": "flight" }
+      { "date": "2026-08-18", "label": "ヌサドゥア → 空港（車） → 日本", "place": "日本（帰国）", "transport": "flight" }
     ]
   },
 
