@@ -786,6 +786,11 @@ function renderRouteMap(data) {
 
   const highlightsWrap = document.getElementById("route-map-highlights");
 
+  // 絵文字ごとの「正面（0度）が向いている既定の方向」の補正値。
+  // 絵文字はもともと斜めや左向きに描かれているものが多く、そのままだと
+  // 進行方向と噛み合わないため、種類ごとに引き算して合わせる。
+  const TRANSPORT_BASE_ANGLE = { flight: -45, car: 180, ferry: 0 };
+
   function selectDay(index) {
     const dayInfo = routeMap.route[index];
     const fraction = routeMap.route.length > 1 ? index / (routeMap.route.length - 1) : 0;
@@ -795,6 +800,14 @@ function renderRouteMap(data) {
     marker.style.top = (point.y / ROUTE_MAP_IMAGE_HEIGHT) * 100 + "%";
     marker.textContent = routeMap.legendIcons[dayInfo.transport].split(" ")[0];
     label.textContent = dayInfo.date + "　" + dayInfo.label;
+
+    // 進行方向（前後の点を結んだ角度）を計算し、絵文字が進む向きを向くように回転させる
+    const delta = Math.max(2, pathLength * 0.01);
+    const beforePt = path.getPointAtLength(Math.max(0, fraction * pathLength - delta));
+    const afterPt = path.getPointAtLength(Math.min(pathLength, fraction * pathLength + delta));
+    const angleDeg = Math.atan2(afterPt.y - beforePt.y, afterPt.x - beforePt.x) * 180 / Math.PI;
+    const baseAngle = TRANSPORT_BASE_ANGLE[dayInfo.transport] || 0;
+    marker.style.setProperty("--heading", (angleDeg - baseAngle) + "deg");
 
     // 移動した瞬間だけ、風になびくような線をさっと見せる
     marker.classList.remove("is-moving");
