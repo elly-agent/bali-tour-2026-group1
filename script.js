@@ -1391,12 +1391,15 @@ function setupNavigationEvents() {
   document.getElementById("btn-autoplay").addEventListener("click", toggleAutoplay);
   document.getElementById("btn-fullscreen").addEventListener("click", toggleFullscreen);
   document.getElementById("btn-today-schedule").addEventListener("click", goToTodaySchedule);
-  document.getElementById("btn-lucky-opa-itinerary").addEventListener("click", () => {
+  document.getElementById("btn-lucky-opa-itinerary").addEventListener("click", (event) => {
     const line = state.data.lineChapter;
+    const btn = event.currentTarget;
     const overlay = document.getElementById("rainbow-overlay");
     overlay.classList.remove("is-active");
+    btn.classList.remove("is-glowing");
     void overlay.offsetWidth; // アニメーションを毎回リスタートさせるためのリフロー
     overlay.classList.add("is-active");
+    btn.classList.add("is-glowing");
     setTimeout(() => openContentModal(line.linkUrl, line.featureTitle), 450);
   });
   document.getElementById("btn-weather-shortcut").addEventListener("click", () => {

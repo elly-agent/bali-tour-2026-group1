@@ -388,12 +388,14 @@
       <section class="slide" data-chapter="10" data-type="itinerary" id="slide-10">
         <div class="slide-inner reveal-group">
           <p class="chapter-eyebrow reveal">Chapter 10</p>
-          <h2 class="chapter-title reveal" data-bind="chapterTitle:itinerary"></h2>
+          <div class="chapter-title-row reveal">
+            <h2 class="chapter-title" data-bind="chapterTitle:itinerary"></h2>
+            <button class="opa-daily-btn" id="btn-lucky-opa-itinerary" type="button">
+              <span class="opa-daily-btn-icon">🌈</span>
+              <span class="opa-daily-btn-text">今日のラッキーオパを見る</span>
+            </button>
+          </div>
           <div class="itinerary-timeline" id="itinerary-timeline"></div>
-          <button class="opa-daily-btn reveal" id="btn-lucky-opa-itinerary" type="button">
-            <span class="opa-daily-btn-icon">🌈</span>
-            <span class="opa-daily-btn-text">今日のラッキーオパを見る</span>
-          </button>
         </div>
       </section>
 
