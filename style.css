@@ -335,7 +335,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 
 .opening-title { text-align: center; color: var(--color-white); z-index: 3; }
 .opening-title-producer {
-  font-size: .8rem; letter-spacing: .18em; color: var(--color-gold-soft);
+  font-size: 1rem; letter-spacing: .18em; color: var(--color-gold-soft);
   margin-bottom: 10px;
   opacity: 0; animation: fade-up-title 1.2s var(--ease-soft) forwards;
 }
@@ -618,6 +618,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 .chapter-title {
   font-size: clamp(1.7rem, 4.2vw, 2.6rem); color: var(--color-turquoise-deep);
   margin-bottom: var(--space-m);
+  white-space: pre-line;
 }
 .chapter-lead { font-size: 1.05rem; color: var(--color-ink-soft); margin-bottom: var(--space-m); }
 
