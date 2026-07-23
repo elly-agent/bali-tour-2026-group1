@@ -745,6 +745,18 @@ ul { list-style: none; margin: 0; padding: 0; }
 .live-weather-day-label { font-size: .7rem; color: var(--color-ink-soft); display: block; }
 .live-weather-day-icon { font-size: 1.3rem; display: block; margin: 4px 0; }
 .live-weather-day-temp { font-size: .76rem; color: var(--color-ink); display: block; }
+
+/* 今夜の星空情報 */
+.live-stargazing-inner {
+  margin-top: var(--space-s); padding-top: var(--space-s);
+  border-top: 1px solid var(--color-sand-dark);
+}
+.live-stargazing-title { font-weight: 700; color: var(--color-ink); margin-bottom: 8px; font-size: .9rem; }
+.live-stargazing-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: .85rem; color: var(--color-ink); padding: 4px 0;
+}
+.live-stargazing-note { font-size: .74rem; color: var(--color-ink-soft); margin-top: 6px; }
 .stat-label { font-size: .8rem; color: var(--color-ink-soft); }
 .stat-value { font-weight: 600; color: var(--color-turquoise-deep); }
 

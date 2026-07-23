@@ -434,13 +434,40 @@ function weatherCodeInfo(code) {
   return WEATHER_CODE_INFO[code] || { icon: "🌤️", label: "―" };
 }
 
-// バリ(デンパサール)の現在の天気と3日間の予報を取得する（Open-Meteo：APIキー不要・無料）
+// 月の満ち欠け（月齢）を計算する。外部サービスを使わず、
+// 「新月からの経過日数 ÷ 朔望月（約29.53日）」という天文学の基本計算式だけで求められるため、
+// 天気とは違ってAPIに頼らずJavaScriptだけで完結する。
+function getMoonPhaseInfo(date) {
+  const synodicMonth = 29.530588853;
+  // 2000年1月6日18:14 UTC が基準となる新月（新月の日）
+  const knownNewMoon = Date.UTC(2000, 0, 6, 18, 14);
+  const daysSince = (date.getTime() - knownNewMoon) / 86400000;
+  const age = ((daysSince % synodicMonth) + synodicMonth) % synodicMonth; // 0〜29.53の月齢
+  const illumination = Math.round((1 - Math.cos((age / synodicMonth) * 2 * Math.PI)) / 2 * 100);
+
+  const phases = [
+    { max: 1.84, icon: "🌑", label: "新月" },
+    { max: 5.53, icon: "🌒", label: "三日月" },
+    { max: 9.22, icon: "🌓", label: "上弦の月" },
+    { max: 12.91, icon: "🌔", label: "十三夜月" },
+    { max: 16.61, icon: "🌕", label: "満月" },
+    { max: 20.30, icon: "🌖", label: "十六夜月" },
+    { max: 23.99, icon: "🌗", label: "下弦の月" },
+    { max: 27.68, icon: "🌘", label: "有明月" },
+    { max: synodicMonth, icon: "🌑", label: "新月" },
+  ];
+  const phase = phases.find((p) => age < p.max) || phases[phases.length - 1];
+  return { icon: phase.icon, label: phase.label, age: age, illumination: illumination };
+}
+
+// バリ(デンパサール)の現在の天気・3日間の予報・星空観測情報を取得する（Open-Meteo：APIキー不要・無料）
 async function fetchBaliWeather() {
   const containers = document.querySelectorAll(".js-live-weather");
+  const stargazingContainers = document.querySelectorAll(".js-live-stargazing");
   try {
     const url = "https://api.open-meteo.com/v1/forecast?latitude=-8.65&longitude=115.2167"
       + "&current=temperature_2m,weather_code"
-      + "&daily=weather_code,temperature_2m_max,temperature_2m_min"
+      + "&daily=weather_code,temperature_2m_max,temperature_2m_min,sunset"
       + "&timezone=Asia%2FMakassar&forecast_days=3";
     const res = await fetch(url);
     if (!res.ok) throw new Error("HTTP " + res.status);
@@ -470,9 +497,29 @@ async function fetchBaliWeather() {
     html += "</div>";
 
     containers.forEach((c) => (c.innerHTML = html));
+
+    // 今夜の星空情報：日没時刻（Open-Meteo）＋ 月齢・月の満ち欠け（計算のみ、API不要）
+    const sunsetTime = json.daily.sunset[0].slice(11, 16); // "2026-08-13T18:07" → "18:07"
+    const moon = getMoonPhaseInfo(new Date());
+    let stargazingHtml = '<div class="live-stargazing-inner">';
+    stargazingHtml += '<p class="live-stargazing-title">🌌 今夜の星空情報</p>';
+    stargazingHtml += '<div class="live-stargazing-row"><span>🌇 日没</span><span>' + sunsetTime + "</span></div>";
+    stargazingHtml += '<div class="live-stargazing-row"><span>' + moon.icon + " " + moon.label + "</span><span>月明かり " + moon.illumination + "%</span></div>";
+    stargazingHtml += '<p class="live-stargazing-note">月明かりが弱い日ほど、星がくっきり見えやすくなります。</p>';
+    stargazingHtml += "</div>";
+    stargazingContainers.forEach((c) => (c.innerHTML = stargazingHtml));
   } catch (err) {
     const errorHtml = '<p class="live-weather-error">天気情報を取得できませんでした（電波の良い場所で再度お試しください）</p>';
     containers.forEach((c) => (c.innerHTML = errorHtml));
+
+    // 天気の取得に失敗しても、月齢だけはAPI不要で計算できるので表示だけは続ける
+    const moon = getMoonPhaseInfo(new Date());
+    let fallbackHtml = '<div class="live-stargazing-inner">';
+    fallbackHtml += '<p class="live-stargazing-title">🌌 今夜の星空情報</p>';
+    fallbackHtml += '<div class="live-stargazing-row"><span>' + moon.icon + " " + moon.label + "</span><span>月明かり " + moon.illumination + "%</span></div>";
+    fallbackHtml += '<p class="live-stargazing-note">日没時刻は電波の良い場所で再度お試しください。</p>';
+    fallbackHtml += "</div>";
+    stargazingContainers.forEach((c) => (c.innerHTML = fallbackHtml));
   }
 }
 
