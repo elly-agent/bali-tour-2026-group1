@@ -130,7 +130,7 @@
       <p class="opening-title-producer" id="opening-title-producer"></p>
       <h1 class="opening-title-main" id="opening-title-main"></h1>
       <p class="opening-title-sub" id="opening-title-sub"></p>
-      <button class="btn-primary" id="btn-start-experience">しおりを開く</button>
+      <button class="btn-primary" id="btn-start-experience">あなたの旅を開く</button>
     </div>
 
     <!-- この旅のテーマ・目的・効果（チャプター1に入る前に、旅への大切なメッセージとして受け取ってもらう） -->
@@ -577,6 +577,16 @@
     <span class="scroll-hint-text">下にスクロール</span>
     <span class="scroll-hint-arrow">▾</span>
   </button>
+
+  <!-- 持ち物チェックが全部そろった時に表示する、お祝いポップアップ -->
+  <div class="checklist-complete-popup hidden" id="checklist-complete-popup">
+    <div class="checklist-complete-panel">
+      <p class="checklist-complete-emoji">🎉</p>
+      <p class="checklist-complete-title">おめでとう！</p>
+      <p class="checklist-complete-text">持ち物の準備、ばっちりです。<br>あとは旅立つだけ！</p>
+      <button class="btn-primary" id="btn-close-checklist-complete">とじる</button>
+    </div>
+  </div>
 
   <!-- 天気・時間ポップアップ -->
   <div class="weather-popup hidden" id="weather-popup">

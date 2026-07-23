@@ -670,6 +670,16 @@ function renderPacking(data) {
   const wrap = document.getElementById("packing-checklist-groups");
   const saved = loadChecklistState();
 
+  // 持ち物の総数を数えておき、全部チェックされた瞬間を判定できるようにする
+  const allItemIds = [];
+  data.packingList.forEach((group) => group.items.forEach((item) => allItemIds.push(item.id)));
+
+  function checkAllComplete() {
+    const current = loadChecklistState();
+    const allChecked = allItemIds.length > 0 && allItemIds.every((id) => current[id]);
+    if (allChecked) showChecklistCompletePopup();
+  }
+
   data.packingList.forEach((group) => {
     wrap.appendChild(el("h3", "checklist-category reveal", group.category));
 
@@ -695,6 +705,7 @@ function renderPacking(data) {
         const current = loadChecklistState();
         current[item.id] = checkbox.checked;
         saveChecklistState(current);
+        if (checkbox.checked) checkAllComplete();
       });
 
       ul.appendChild(li);
@@ -703,6 +714,14 @@ function renderPacking(data) {
   });
 
   document.getElementById("packing-tip").textContent = data.packingTip;
+}
+
+// 持ち物チェックが全部そろった時だけ表示する、お祝いポップアップ
+function showChecklistCompletePopup() {
+  document.getElementById("checklist-complete-popup").classList.remove("hidden");
+}
+function closeChecklistCompletePopup() {
+  document.getElementById("checklist-complete-popup").classList.add("hidden");
 }
 
 // 現地(バリ)時間での「今日」の日付を YYYY-MM-DD 形式で取得
@@ -1615,6 +1634,10 @@ function setupNavigationEvents() {
   });
   document.getElementById("weather-popup").addEventListener("click", (event) => {
     if (event.target.id === "weather-popup") document.getElementById("weather-popup").classList.add("hidden");
+  });
+  document.getElementById("btn-close-checklist-complete").addEventListener("click", closeChecklistCompletePopup);
+  document.getElementById("checklist-complete-popup").addEventListener("click", (event) => {
+    if (event.target.id === "checklist-complete-popup") closeChecklistCompletePopup();
   });
 
   // 「下にスクロール」ボタン：タップで現在のチャプターを1画面分下へスクロールする

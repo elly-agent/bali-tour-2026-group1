@@ -1347,6 +1347,25 @@ ul { list-style: none; margin: 0; padding: 0; }
   margin: var(--space-m); align-self: center;
 }
 
+/* --- 持ち物チェック完了のお祝いポップアップ --- */
+.checklist-complete-popup {
+  position: fixed; inset: 0; z-index: 460; background: rgba(6,19,28,.75);
+  display: flex; align-items: center; justify-content: center; padding: var(--space-m);
+}
+.checklist-complete-popup.hidden { display: none; }
+.checklist-complete-panel {
+  background: var(--color-white); border-radius: var(--radius-l);
+  width: min(340px, 100%); box-shadow: 0 20px 60px rgba(0,0,0,.4);
+  padding: var(--space-l) var(--space-m); text-align: center;
+}
+.checklist-complete-emoji { font-size: 3rem; margin-bottom: var(--space-s); animation: shortcut-float 1.6s ease-in-out infinite; }
+.checklist-complete-title {
+  font-family: var(--font-heading); font-size: 1.6rem; font-weight: 700;
+  color: var(--color-turquoise-deep); margin-bottom: var(--space-s);
+}
+.checklist-complete-text { font-size: .92rem; color: var(--color-ink-soft); line-height: 1.7; margin-bottom: var(--space-m); }
+.checklist-complete-panel .btn-primary { margin-top: 0; }
+
 /* --- 天気・時間ポップアップ --- */
 .weather-popup {
   position: fixed; inset: 0; z-index: 450; background: rgba(6,19,28,.75);
