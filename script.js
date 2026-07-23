@@ -1365,7 +1365,7 @@ function closeChapterMenu() {
 function playTakeoffSfx() {
   const sfx = document.getElementById("sfx-plane");
   sfx.currentTime = 0;
-  sfx.volume = 0.5;
+  sfx.volume = 0.7;
   sfx.play().catch(() => {});
 }
 
@@ -1377,7 +1377,7 @@ function playFlyingSfx() {
     flyingSfxFadeTimer = null;
   }
   sfx.currentTime = 0;
-  sfx.volume = 0.4;
+  sfx.volume = 0.6;
   sfx.play().catch(() => {});
 }
 let flyingSfxFadeTimer = null;

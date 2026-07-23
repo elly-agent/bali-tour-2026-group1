@@ -588,8 +588,8 @@ ul { list-style: none; margin: 0; padding: 0; }
 
 .slide {
   position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
   overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
   padding: var(--space-l) var(--space-m);
   opacity: 0; visibility: hidden;
   transform: translateX(40px) scale(.98);
@@ -602,7 +602,13 @@ ul { list-style: none; margin: 0; padding: 0; }
 .slide.is-active { opacity: 1; visibility: visible; transform: translateX(0) scale(1); z-index: 2; }
 .slide.is-prev { transform: translateX(-40px) scale(.98); }
 
-.slide-inner { width: 100%; max-width: 880px; margin: auto; padding-bottom: var(--space-l); position: relative; }
+/* 中身が画面より短い時は縦中央に、長い時は上から自然に流れて
+   最後まで確実にスクロールできるようにする（flexでの中央寄せ＋overflow:autoの
+   組み合わせは、はみ出した分の一部がスクロールで届かなくなる既知の不具合があるため避ける） */
+.slide-inner {
+  width: 100%; max-width: 880px; margin: 0 auto; padding-bottom: var(--space-l); position: relative;
+  min-height: 100%; display: flex; flex-direction: column; justify-content: center;
+}
 
 /* ブランドロゴマーク(OPA)：バリ島ってどこ？チャプターの冒頭に、控えめに配置 */
 .brand-mark { display: flex; justify-content: center; margin-bottom: var(--space-m); }

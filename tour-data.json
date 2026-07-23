@@ -16,19 +16,16 @@
   "_bgmTracksReadme": "BGMの選択肢はここで管理しています。新しい曲を追加したい場合は、assets/audio に音声ファイルを置いて、下のリストに { \"id\":任意の名前, \"label\":一覧に表示する曲名, \"files\":[{\"src\":\"assets/audio/ファイル名\",\"volume\":0〜1の音量}] } を追加してください（AIに頼めば代わりに追加できます）。",
   "bgmTracks": [
     { "id": "bali-tide-calm", "label": "Bali Tide Calm", "files": [
-        { "src": "assets/audio/bali-tide-calm.mp3", "volume": 0.32 }
+        { "src": "assets/audio/bali-tide-calm.mp3", "volume": 0.18 }
       ] },
     { "id": "tsuki-no-sunahama", "label": "月の砂浜", "files": [
-        { "src": "assets/audio/tsuki-no-sunahama.mp3", "volume": 0.32 }
+        { "src": "assets/audio/tsuki-no-sunahama.mp3", "volume": 0.18 }
       ] },
     { "id": "whispers-of-the-night", "label": "Whispers of the Night", "files": [
-        { "src": "assets/audio/whispers-of-the-night.mp3", "volume": 0.32 }
-      ] },
-    { "id": "asa-no-mirai", "label": "朝の未来", "files": [
-        { "src": "assets/audio/asa-no-mirai.mp3", "volume": 0.32 }
+        { "src": "assets/audio/whispers-of-the-night.mp3", "volume": 0.18 }
       ] },
     { "id": "seaside", "label": "シーサイド（波の音）", "files": [
-        { "src": "assets/audio/seaside.wav", "volume": 0.45 }
+        { "src": "assets/audio/seaside.wav", "volume": 0.28 }
       ] }
   ],
   "defaultBgmTrackId": "bali-tide-calm",
