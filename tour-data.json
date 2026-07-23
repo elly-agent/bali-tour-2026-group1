@@ -335,7 +335,7 @@
   ],
 
   "routeMap": {
-    "description": "旅の道のりを地図で振り返ってみましょう。日付を選ぶと、現在地が移動します。",
+    "description": "旅の道のりを地図で体験！日付を選ぶと、現在地が移動します。",
     "legendIcons": { "flight": "✈️ 飛行機", "car": "🚗 車", "ferry": "⛴️ フェリー" },
     "route": [
       { "date": "2026-08-13", "label": "日本 → デンパサール", "place": "デンパサール", "transport": "flight" },
