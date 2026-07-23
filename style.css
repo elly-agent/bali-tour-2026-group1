@@ -964,15 +964,62 @@ ul { list-style: none; margin: 0; padding: 0; }
 }
 .route-map-path { fill: none; stroke: var(--color-gold); stroke-width: 5; stroke-dasharray: 10 10; }
 .route-current-marker {
-  position: absolute; font-size: 1.6rem; transition: left .8s var(--ease-soft), top .8s var(--ease-soft);
+  position: absolute; font-size: 2.6rem; transition: left .8s var(--ease-soft), top .8s var(--ease-soft);
   transform: translate(-50%, -50%);
   filter: drop-shadow(0 2px 6px rgba(0,0,0,.4));
+  z-index: 5;
 }
+/* マーカーの後ろに常時ふわっと光る輪を出して、地図上で見つけやすくする */
+.route-current-marker::before {
+  content: ""; position: absolute; inset: -16px; z-index: -1; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,.6), transparent 70%);
+  animation: route-marker-pulse 1.6s ease-in-out infinite;
+}
+@keyframes route-marker-pulse {
+  0%, 100% { transform: scale(.8); opacity: .55; }
+  50%      { transform: scale(1.2); opacity: 1; }
+}
+/* 日付を切り替えた瞬間だけ、風で流れるような線をさっと後方に見せる */
+.route-current-marker.is-moving::after {
+  content: ""; position: absolute; top: 50%; right: 100%; margin-right: 4px;
+  width: 30px; height: 6px; transform: translateY(-50%);
+  background-image:
+    linear-gradient(90deg, transparent, rgba(255,255,255,.9) 60%, transparent),
+    linear-gradient(90deg, transparent, rgba(255,255,255,.9) 60%, transparent),
+    linear-gradient(90deg, transparent, rgba(255,255,255,.9) 60%, transparent);
+  background-size: 100% 2px; background-repeat: no-repeat;
+  background-position: 0 0, 0 50%, 0 100%;
+  animation: route-wind-trail .7s ease-out;
+  pointer-events: none;
+}
+@keyframes route-wind-trail {
+  0%   { opacity: 0; transform: translateY(-50%) translateX(14px); }
+  25%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-50%) translateX(-6px); }
+}
+
+/* 日付をタップしてもらう最初の一回だけ表示する、控えめなヒント */
+.route-days-hint {
+  font-size: .8rem; font-weight: 600; color: var(--color-turquoise-deep);
+  background: rgba(42,183,201,.12); border: 1px dashed var(--color-turquoise);
+  border-radius: 999px; padding: 6px 14px; display: inline-block;
+  margin-bottom: 8px;
+  animation: route-hint-bounce 1.2s ease-in-out infinite;
+}
+@keyframes route-hint-bounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+
 .route-map-days { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: var(--space-s); }
 .route-map-days button {
-  padding: 8px 16px; border-radius: 999px; background: var(--color-sand); font-size: .82rem;
-  color: var(--color-ink-soft); transition: background var(--dur-fast) ease, color var(--dur-fast) ease;
+  padding: 8px 18px; border-radius: 999px;
+  background: var(--color-white); border: 2px solid var(--color-turquoise);
+  color: var(--color-turquoise-deep); font-size: .82rem; font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  transition: background var(--dur-fast) ease, color var(--dur-fast) ease, transform var(--dur-fast) ease;
 }
+.route-map-days button:hover { transform: translateY(-2px); }
 .route-map-days button.is-active { background: var(--color-turquoise); color: var(--color-white); }
 .route-map-current-label { font-weight: 600; color: var(--color-emerald); }
 .route-map-highlights { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }

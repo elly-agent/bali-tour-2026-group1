@@ -796,6 +796,11 @@ function renderRouteMap(data) {
     marker.textContent = routeMap.legendIcons[dayInfo.transport].split(" ")[0];
     label.textContent = dayInfo.date + "　" + dayInfo.label;
 
+    // 移動した瞬間だけ、風になびくような線をさっと見せる
+    marker.classList.remove("is-moving");
+    void marker.offsetWidth; // リフローを強制して、毎回アニメーションを再生し直す
+    marker.classList.add("is-moving");
+
     // その日に訪れる場所を、旅行の流れ(itinerary)のデータから拾って表示する
     highlightsWrap.innerHTML = "";
     const dayItinerary = data.itinerary[index];
@@ -813,12 +818,31 @@ function renderRouteMap(data) {
   routeMap.route.forEach((dayInfo, index) => {
     const btn = document.createElement("button");
     btn.textContent = dayInfo.date.slice(5).replace("-", "/");
-    btn.addEventListener("click", () => selectDay(index));
+    btn.addEventListener("click", () => {
+      selectDay(index);
+      dismissRouteDaysHint();
+    });
     daysWrap.appendChild(btn);
   });
 
   // 初期表示は1日目
   selectDay(0);
+  maybeShowRouteDaysHint();
+}
+
+// 「日付ボタンを押すと地図が動く」ことに気づいてもらうための、初回限定ヒント
+const ROUTE_HINT_STORAGE_KEY = "baliTour2026_routeHintSeen";
+function maybeShowRouteDaysHint() {
+  try {
+    if (localStorage.getItem(ROUTE_HINT_STORAGE_KEY)) return;
+  } catch (e) {}
+  const hint = document.getElementById("route-days-hint");
+  if (hint) hint.classList.remove("hidden");
+}
+function dismissRouteDaysHint() {
+  const hint = document.getElementById("route-days-hint");
+  if (hint) hint.classList.add("hidden");
+  try { localStorage.setItem(ROUTE_HINT_STORAGE_KEY, "1"); } catch (e) {}
 }
 
 // --- Chapter 15: フォトギャラリー ---
