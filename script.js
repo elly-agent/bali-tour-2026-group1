@@ -1223,19 +1223,91 @@ function goToSlide(index, options) {
   saveResumeState(clamped);
 }
 
+// お気に入りチャプターは、サーバーには送らずこの端末のブラウザだけに保存する
+const FAVORITES_STORAGE_KEY = "baliTour2026_favorites";
+function loadFavorites() {
+  try {
+    return JSON.parse(localStorage.getItem(FAVORITES_STORAGE_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+function saveFavorites(list) {
+  try { localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(list)); } catch (e) {}
+}
+let showFavoritesOnly = false;
+
 function buildChapterMenu(data) {
   const grid = document.getElementById("chapter-menu-grid");
+  const emptyNote = document.getElementById("chapter-menu-empty");
+  const favorites = loadFavorites();
+
   data.chapters.forEach((chapter) => {
-    const button = el("button", "chapter-menu-item");
-    button.innerHTML =
+    const item = el("div", "chapter-menu-item");
+    item.dataset.chapterId = chapter.id;
+
+    const navButton = el("button", "chapter-menu-item-nav");
+    navButton.innerHTML =
       "<span class='m-num'>Chapter " + String(chapter.number).padStart(2, "0") + "</span>" +
       "<span class='m-title'>" + chapter.title + "</span>";
-    button.addEventListener("click", () => {
+    navButton.addEventListener("click", () => {
       goToSlide(chapter.number - 1);
       closeChapterMenu();
     });
-    grid.appendChild(button);
+
+    const starButton = el("button", "chapter-menu-item-star");
+    starButton.type = "button";
+    starButton.title = "お気に入りに登録";
+    const isFav = favorites.indexOf(chapter.id) !== -1;
+    starButton.textContent = isFav ? "★" : "☆";
+    starButton.classList.toggle("is-favorite", isFav);
+    starButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      toggleFavorite(chapter.id, starButton, item);
+    });
+
+    item.appendChild(navButton);
+    item.appendChild(starButton);
+    grid.appendChild(item);
   });
+
+  applyFavoritesFilter();
+
+  document.getElementById("btn-favorites-toggle").addEventListener("click", () => {
+    showFavoritesOnly = !showFavoritesOnly;
+    document.getElementById("btn-favorites-toggle").classList.toggle("is-active", showFavoritesOnly);
+    applyFavoritesFilter();
+  });
+}
+
+function toggleFavorite(chapterId, starButton, item) {
+  const favorites = loadFavorites();
+  const index = favorites.indexOf(chapterId);
+  if (index === -1) {
+    favorites.push(chapterId);
+    starButton.textContent = "★";
+    starButton.classList.add("is-favorite");
+  } else {
+    favorites.splice(index, 1);
+    starButton.textContent = "☆";
+    starButton.classList.remove("is-favorite");
+  }
+  saveFavorites(favorites);
+  applyFavoritesFilter();
+}
+
+// 「お気に入りだけ表示」がONのときは、お気に入りにしたチャプターだけを一覧に残す
+function applyFavoritesFilter() {
+  const favorites = loadFavorites();
+  const items = document.querySelectorAll(".chapter-menu-item");
+  let visibleCount = 0;
+  items.forEach((item) => {
+    const isFav = favorites.indexOf(item.dataset.chapterId) !== -1;
+    const shouldShow = !showFavoritesOnly || isFav;
+    item.classList.toggle("hidden", !shouldShow);
+    if (shouldShow) visibleCount++;
+  });
+  document.getElementById("chapter-menu-empty").classList.toggle("hidden", !(showFavoritesOnly && visibleCount === 0));
 }
 
 function openChapterMenu() {

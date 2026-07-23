@@ -1272,15 +1272,34 @@ ul { list-style: none; margin: 0; padding: 0; }
   border-bottom: 1px solid var(--color-sand-dark);
 }
 .chapter-menu-header h2 { color: var(--color-turquoise-deep); font-size: 1.1rem; }
+.chapter-menu-favtoggle {
+  display: block; width: 100%; text-align: center;
+  padding: 8px 14px; margin-bottom: var(--space-s); border-radius: 999px;
+  background: var(--color-sand); color: var(--color-ink-soft);
+  font-size: .82rem; font-weight: 600;
+  transition: background var(--dur-fast) ease, color var(--dur-fast) ease;
+}
+.chapter-menu-favtoggle.is-active { background: var(--color-gold); color: var(--color-white); }
+.chapter-menu-empty { text-align: center; color: var(--color-ink-soft); font-size: .82rem; padding: var(--space-m) 0; }
 .chapter-menu-grid { display: flex; flex-direction: column; gap: 8px; }
 .chapter-menu-item {
-  display: flex; align-items: center; gap: 12px;
-  background: var(--color-sand); border-radius: var(--radius-m); padding: 12px 14px;
-  text-align: left; transition: background var(--dur-fast) ease, transform var(--dur-fast) ease;
+  display: flex; align-items: center; gap: 4px;
+  background: var(--color-sand); border-radius: var(--radius-m);
+  transition: background var(--dur-fast) ease, transform var(--dur-fast) ease;
 }
 .chapter-menu-item:hover { background: var(--color-sand-dark); transform: translateX(-2px); }
+.chapter-menu-item-nav {
+  flex: 1; display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; text-align: left; min-width: 0;
+}
 .chapter-menu-item .m-num { font-size: .7rem; color: var(--color-gold); flex-shrink: 0; min-width: 32px; }
-.chapter-menu-item .m-title { font-size: .88rem; color: var(--color-ink); }
+.chapter-menu-item .m-title { font-size: .88rem; color: var(--color-ink); white-space: pre-line; }
+.chapter-menu-item-star {
+  flex-shrink: 0; font-size: 1.2rem; padding: 10px 14px; color: var(--color-ink-soft);
+  transition: transform var(--dur-fast) ease;
+}
+.chapter-menu-item-star:hover { transform: scale(1.15); }
+.chapter-menu-item-star.is-favorite { color: var(--color-gold); }
 .chapter-menu-item.is-current { background: var(--color-turquoise); }
 .chapter-menu-item.is-current .m-num,
 .chapter-menu-item.is-current .m-title { color: var(--color-white); }
