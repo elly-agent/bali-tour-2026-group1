@@ -359,24 +359,29 @@ ul { list-style: none; margin: 0; padding: 0; }
   width: 100%; height: 100%; max-width: 640px; margin: 0 auto;
   box-sizing: border-box;
   text-align: center; color: var(--color-white); z-index: 3;
-  padding: var(--space-l) var(--space-m);
+  padding: clamp(16px, 4vh, var(--space-l)) var(--space-m);
 }
 .prologue-logo {
-  flex: none; margin-bottom: var(--space-s);
+  flex: none; margin-bottom: clamp(4px, 1.5vh, var(--space-s));
   opacity: 0; animation: fade-up-title 1.2s var(--ease-soft) forwards;
 }
 .prologue-logo-img {
-  width: 68px; height: 68px; object-fit: contain;
+  width: clamp(32px, 7vh, 68px); height: clamp(32px, 7vh, 68px); object-fit: contain;
   filter: drop-shadow(0 4px 16px rgba(0,0,0,.35));
 }
-/* 中央のテーマ・目的・効果は、文字を大きくしても
-   画面の高さに収まりきらない場合はここだけがスクロールし、
-   下の「旅を始める」ボタンは常に画面内に表示され続ける */
+/* 中央のテーマ・目的・効果は、文字サイズを画面の高さに応じて自動で縮める(clamp)。
+   万が一それでも収まらない極端な画面サイズがあった場合の保険として、
+   ここだけは最後の手段でスクロールできるようにしておく（文字が消えるのを防ぐため）。
+   スクロールバー自体は目立たない薄い見た目にしている。 */
 .prologue-scroll {
   flex: 1 1 auto; min-height: 0; width: 100%;
-  overflow-y: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.3) transparent;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
+.prologue-scroll::-webkit-scrollbar { width: 4px; }
+.prologue-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.3); border-radius: 999px; }
+.prologue-scroll::-webkit-scrollbar-track { background: transparent; }
 .prologue-eyebrow {
   font-size: .82rem; letter-spacing: .26em; color: var(--color-gold-soft);
   margin-bottom: var(--space-l);
@@ -384,39 +389,26 @@ ul { list-style: none; margin: 0; padding: 0; }
 }
 .prologue-eyebrow.hidden { margin-bottom: 0; }
 .prologue-block {
-  margin-bottom: var(--space-l);
+  margin-bottom: clamp(10px, 3vh, var(--space-l));
   opacity: 0; animation: fade-up-title 1.2s var(--ease-soft) forwards;
 }
 .prologue-block:nth-of-type(2) { animation-delay: .25s; }
 .prologue-block:nth-of-type(3) { animation-delay: .5s; }
 .prologue-label {
-  font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; letter-spacing: .2em;
-  color: var(--color-turquoise); margin-bottom: 14px;
+  font-family: var(--font-heading); font-size: clamp(.95rem, 2.6vh, 1.25rem); font-weight: 700; letter-spacing: .2em;
+  color: var(--color-turquoise); margin-bottom: clamp(6px, 1.5vh, 14px);
 }
 .prologue-text {
-  font-family: var(--font-heading); font-size: 1.42rem; line-height: 1.9; letter-spacing: .03em;
+  font-family: var(--font-heading); font-size: clamp(1rem, 3.4vh, 1.42rem); line-height: 1.5; letter-spacing: .03em;
   color: var(--color-white);
 }
 .opening-prologue .btn-primary {
-  flex: none; margin-top: var(--space-m); margin-bottom: 0;
+  flex: none; margin-top: clamp(8px, 2vh, var(--space-m)); margin-bottom: 0;
   opacity: 0; animation: fade-up-title 1.2s var(--ease-soft) forwards .75s;
 }
 
-@media (max-height: 700px) {
-  .prologue-text { font-size: 1.18rem; line-height: 1.7; }
-  .prologue-block { margin-bottom: var(--space-m); }
-  .prologue-logo-img { width: 48px; height: 48px; }
-}
-
 @media (max-width: 480px) {
-  .opening-prologue { padding: var(--space-m) var(--space-s); }
-  .prologue-text { font-size: 1.22rem; line-height: 1.55; }
-  .prologue-label { font-size: 1.08rem; margin-bottom: 8px; }
-  .prologue-block { margin-bottom: var(--space-m); }
-  .prologue-eyebrow { margin-bottom: var(--space-s); }
-  .prologue-logo { margin-bottom: var(--space-s); }
-  .prologue-logo-img { width: 40px; height: 40px; }
-  .opening-prologue .btn-primary { margin-top: var(--space-s); padding: 10px 32px; }
+  .opening-prologue { padding: clamp(16px, 4vh, var(--space-m)) var(--space-s); }
 }
 
 .btn-primary, .btn-secondary {
