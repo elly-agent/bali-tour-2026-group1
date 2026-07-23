@@ -390,6 +390,10 @@
           <p class="chapter-eyebrow reveal">Chapter 10</p>
           <h2 class="chapter-title reveal" data-bind="chapterTitle:itinerary"></h2>
           <div class="itinerary-timeline" id="itinerary-timeline"></div>
+          <button class="opa-daily-btn reveal" id="btn-lucky-opa-itinerary" type="button">
+            <span class="opa-daily-btn-icon">🌈</span>
+            <span class="opa-daily-btn-text">今日のラッキーオパを見る</span>
+          </button>
         </div>
       </section>
 
@@ -545,6 +549,9 @@
 
     </div>
   </main>
+
+  <!-- ラッキーオパのボタンを押した時に、画面にふわっとかかる透明感のある虹エフェクト -->
+  <div class="rainbow-overlay" id="rainbow-overlay" aria-hidden="true"></div>
 
   <!-- まだ続きの文章がある場合に表示する、下スクロールのボタン（タップで下へスクロールする） -->
   <button class="scroll-hint hidden" id="scroll-hint" type="button">

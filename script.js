@@ -1391,6 +1391,14 @@ function setupNavigationEvents() {
   document.getElementById("btn-autoplay").addEventListener("click", toggleAutoplay);
   document.getElementById("btn-fullscreen").addEventListener("click", toggleFullscreen);
   document.getElementById("btn-today-schedule").addEventListener("click", goToTodaySchedule);
+  document.getElementById("btn-lucky-opa-itinerary").addEventListener("click", () => {
+    const line = state.data.lineChapter;
+    const overlay = document.getElementById("rainbow-overlay");
+    overlay.classList.remove("is-active");
+    void overlay.offsetWidth; // アニメーションを毎回リスタートさせるためのリフロー
+    overlay.classList.add("is-active");
+    setTimeout(() => openContentModal(line.linkUrl, line.featureTitle), 450);
+  });
   document.getElementById("btn-weather-shortcut").addEventListener("click", () => {
     document.getElementById("weather-popup").classList.remove("hidden");
   });

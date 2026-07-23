@@ -76,7 +76,7 @@
     { "id": "gallery", "number": 15, "title": "フォトギャラリー", "type": "gallery" },
     { "id": "spots", "number": 16, "title": "バリの見どころ", "type": "spots" },
     { "id": "faq", "number": 17, "title": "よくある質問", "type": "faq" },
-    { "id": "line", "number": 18, "title": "バリでもチェック！公式LINE", "type": "line" },
+    { "id": "line", "number": 18, "title": "バリでもチェック！ラッキーオパ", "type": "line" },
     { "id": "restaurants", "number": 19, "title": "レストラン紹介", "type": "restaurants" }
   ],
 
