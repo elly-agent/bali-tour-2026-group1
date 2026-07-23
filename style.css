@@ -1121,32 +1121,6 @@ ul { list-style: none; margin: 0; padding: 0; }
 .restaurant-card .r-name { padding: 10px 10px 2px; color: var(--color-turquoise-deep); font-weight: 700; font-size: .92rem; }
 .restaurant-card .r-desc { padding: 0 12px 14px; font-size: .78rem; color: var(--color-ink-soft); line-height: 1.6; }
 
-/* --- Chapter 20: みんなの写真（簡易フォトシェア） --- */
-.photoshare-form {
-  display: flex; flex-direction: column; gap: 10px;
-  background: var(--color-sand); border-radius: var(--radius-m);
-  padding: var(--space-m); margin-bottom: var(--space-m);
-}
-.photoshare-form input[type="text"], .photoshare-form input[type="file"] {
-  padding: 10px 14px; border-radius: 999px; border: 1px solid var(--color-sand-dark);
-  font-size: .88rem; background: var(--color-white); color: var(--color-ink);
-  font-family: var(--font-body);
-}
-.photoshare-form input[type="file"] { border-radius: var(--radius-m); }
-.photoshare-form .btn-primary { margin-top: 0; align-self: center; }
-.photoshare-status { text-align: center; font-size: .82rem; color: var(--color-turquoise-deep); font-weight: 600; }
-.photoshare-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-s); }
-.photoshare-card { background: var(--color-sand); border-radius: var(--radius-m); overflow: hidden; }
-.photoshare-card img { width: 100%; height: 160px; object-fit: cover; display: block; }
-.photoshare-card-info { padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; }
-.photoshare-card-name { font-size: .78rem; font-weight: 700; color: var(--color-turquoise-deep); }
-.photoshare-card-caption { font-size: .76rem; color: var(--color-ink-soft); line-height: 1.5; }
-.photoshare-loading { grid-column: 1 / -1; text-align: center; color: var(--color-ink-soft); font-size: .85rem; padding: var(--space-m) 0; }
-@media (max-width: 480px) {
-  .photoshare-grid { grid-template-columns: 1fr 1fr; }
-  .photoshare-card img { height: 130px; }
-}
-
 /* --- SATORU会 公式LINE案内 --- */
 .line-feature-card {
   text-align: center; margin-top: var(--space-l);

@@ -1,11 +1,5 @@
 name = "bali-tour-2026-group1"
-main = "worker.js"
 compatibility_date = "2026-07-23"
 
 [assets]
 directory = "."
-binding = "ASSETS"
-
-[[r2_buckets]]
-binding = "PHOTOS_BUCKET"
-bucket_name = "bali-tour-2026-photos"
