@@ -1040,6 +1040,82 @@ function renderLineChapter(data) {
   });
 }
 
+// --- Chapter 20: みんなの写真（簡易フォトシェア） ---
+function renderPhotoshare() {
+  const form = document.getElementById("photoshare-form");
+  const fileInput = document.getElementById("photoshare-file");
+  const nameInput = document.getElementById("photoshare-name");
+  const captionInput = document.getElementById("photoshare-caption");
+  const submitBtn = document.getElementById("photoshare-submit");
+  const status = document.getElementById("photoshare-status");
+  const grid = document.getElementById("photoshare-grid");
+
+  function showStatus(text) {
+    status.textContent = text;
+    status.classList.remove("hidden");
+  }
+
+  async function loadPhotos() {
+    grid.innerHTML = '<p class="photoshare-loading">読み込み中…</p>';
+    try {
+      const res = await fetch("/api/photos");
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const photos = await res.json();
+      grid.innerHTML = "";
+      if (photos.length === 0) {
+        grid.innerHTML = '<p class="photoshare-loading">まだ投稿がありません。最初の一枚をどうぞ！</p>';
+        return;
+      }
+      photos.forEach((p) => {
+        const card = el("div", "photoshare-card reveal");
+        const img = document.createElement("img");
+        img.src = "/photo-file/" + encodeURIComponent(p.key);
+        img.alt = p.caption || "投稿された写真";
+        img.loading = "lazy";
+        card.appendChild(img);
+        if (p.name || p.caption) {
+          const info = el("div", "photoshare-card-info");
+          if (p.name) info.appendChild(el("span", "photoshare-card-name", p.name));
+          if (p.caption) info.appendChild(el("span", "photoshare-card-caption", p.caption));
+          card.appendChild(info);
+        }
+        grid.appendChild(card);
+      });
+    } catch (err) {
+      grid.innerHTML = '<p class="photoshare-loading">写真を読み込めませんでした（電波の良い場所で再度お試しください）</p>';
+    }
+  }
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    submitBtn.disabled = true;
+    showStatus("投稿しています…");
+
+    const formData = new FormData();
+    formData.append("photo", file);
+    formData.append("name", nameInput.value);
+    formData.append("caption", captionInput.value);
+
+    try {
+      const res = await fetch("/api/photos", { method: "POST", body: formData });
+      const result = await res.json();
+      if (!res.ok || result.error) throw new Error(result.error || "アップロードに失敗しました");
+      showStatus("投稿しました！");
+      form.reset();
+      loadPhotos();
+    } catch (err) {
+      showStatus(err.message || "投稿に失敗しました。もう一度お試しください。");
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
+  loadPhotos();
+}
+
 // --- エンディング ---
 function renderEnding(data) {
   document.getElementById("ending-producer").textContent = data.meta.producer;
@@ -1096,6 +1172,7 @@ function renderAllChapters(data) {
   renderFAQ(data);
   renderLineChapter(data);
   renderRestaurants(data);
+  renderPhotoshare();
   renderEnding(data);
   buildChapterMenu(data);
 }
