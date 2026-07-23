@@ -390,7 +390,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 .prologue-block:nth-of-type(2) { animation-delay: .25s; }
 .prologue-block:nth-of-type(3) { animation-delay: .5s; }
 .prologue-label {
-  font-family: var(--font-heading); font-size: 1.05rem; letter-spacing: .2em;
+  font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; letter-spacing: .2em;
   color: var(--color-turquoise); margin-bottom: 14px;
 }
 .prologue-text {
@@ -409,13 +409,13 @@ ul { list-style: none; margin: 0; padding: 0; }
 }
 
 @media (max-width: 480px) {
-  .opening-prologue { padding: var(--space-m) var(--space-m); }
-  .prologue-text { font-size: 1.05rem; line-height: 1.45; }
-  .prologue-label { font-size: .88rem; margin-bottom: 6px; }
-  .prologue-block { margin-bottom: var(--space-s); }
+  .opening-prologue { padding: var(--space-m) var(--space-s); }
+  .prologue-text { font-size: 1.22rem; line-height: 1.55; }
+  .prologue-label { font-size: 1.08rem; margin-bottom: 8px; }
+  .prologue-block { margin-bottom: var(--space-m); }
   .prologue-eyebrow { margin-bottom: var(--space-s); }
   .prologue-logo { margin-bottom: var(--space-s); }
-  .prologue-logo-img { width: 36px; height: 36px; }
+  .prologue-logo-img { width: 40px; height: 40px; }
   .opening-prologue .btn-primary { margin-top: var(--space-s); padding: 10px 32px; }
 }
 
