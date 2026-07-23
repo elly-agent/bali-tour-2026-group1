@@ -374,18 +374,15 @@ ul { list-style: none; margin: 0; padding: 0; }
    下の「旅を始める」ボタンは常に画面内に表示され続ける */
 .prologue-scroll {
   flex: 1 1 auto; min-height: 0; width: 100%;
-  overflow-y: auto;
-  scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.3) transparent;
+  overflow-y: hidden;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
-.prologue-scroll::-webkit-scrollbar { width: 4px; }
-.prologue-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.3); border-radius: 999px; }
-.prologue-scroll::-webkit-scrollbar-track { background: transparent; }
 .prologue-eyebrow {
   font-size: .82rem; letter-spacing: .26em; color: var(--color-gold-soft);
   margin-bottom: var(--space-l);
   opacity: 0; animation: fade-up-title 1.2s var(--ease-soft) forwards;
 }
+.prologue-eyebrow.hidden { margin-bottom: 0; }
 .prologue-block {
   margin-bottom: var(--space-l);
   opacity: 0; animation: fade-up-title 1.2s var(--ease-soft) forwards;
@@ -412,11 +409,14 @@ ul { list-style: none; margin: 0; padding: 0; }
 }
 
 @media (max-width: 480px) {
-  .prologue-text { font-size: 1.1rem; line-height: 1.6; }
-  .prologue-label { font-size: .92rem; margin-bottom: 10px; }
+  .opening-prologue { padding: var(--space-m) var(--space-m); }
+  .prologue-text { font-size: 1.05rem; line-height: 1.45; }
+  .prologue-label { font-size: .88rem; margin-bottom: 6px; }
   .prologue-block { margin-bottom: var(--space-s); }
-  .prologue-eyebrow { margin-bottom: var(--space-m); }
-  .prologue-logo-img { width: 44px; height: 44px; }
+  .prologue-eyebrow { margin-bottom: var(--space-s); }
+  .prologue-logo { margin-bottom: var(--space-s); }
+  .prologue-logo-img { width: 36px; height: 36px; }
+  .opening-prologue .btn-primary { margin-top: var(--space-s); padding: 10px 32px; }
 }
 
 .btn-primary, .btn-secondary {
@@ -473,6 +473,29 @@ ul { list-style: none; margin: 0; padding: 0; }
   transition: background var(--dur-fast) ease, transform var(--dur-fast) ease;
 }
 .icon-btn:hover { background: rgba(201,162,75,.18); transform: scale(1.06); }
+
+/* topbarのすぐ下、白い余白部分に常設する3つのショートカットボタン */
+.shortcut-bar {
+  position: fixed; top: 66px; left: 0; right: 0; z-index: 199;
+  display: flex; justify-content: center; flex-wrap: wrap; gap: 8px;
+  padding: 8px var(--space-m);
+  background: rgba(243,234,217,.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(201,162,75,.25);
+}
+.shortcut-pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 999px; border: none; cursor: pointer;
+  color: var(--color-white); font-size: .78rem; font-weight: 600; letter-spacing: .02em;
+  box-shadow: 0 4px 12px rgba(0,0,0,.18);
+  transition: transform var(--dur-fast) ease, box-shadow var(--dur-fast) ease;
+}
+.shortcut-pill:hover { transform: translateY(-2px); }
+.shortcut-pill-icon { font-size: .95rem; }
+.shortcut-pill--bgm { background: var(--color-gold); }
+.shortcut-pill--today { background: var(--color-turquoise-deep); }
+.shortcut-pill--today:hover { background: var(--color-turquoise); }
+.shortcut-pill--weather { background: var(--color-emerald); }
 
 /* BGM切り替えボタン：一目でON/OFFがわかるよう、状態に応じて見た目を大きく変える */
 #btn-bgm {
@@ -541,7 +564,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 .bgm-hint.hidden { display: none; }
 
 .progress-bar {
-  position: fixed; top: 66px; left: 0; right: 0; z-index: 199;
+  position: fixed; top: 118px; left: 0; right: 0; z-index: 199;
   height: 3px; background: rgba(34,52,58,.08);
 }
 .progress-fill {
@@ -551,11 +574,11 @@ ul { list-style: none; margin: 0; padding: 0; }
 }
 
 .slides-viewport {
-  flex: 1; margin-top: 69px; margin-bottom: 74px;
-  height: calc(100vh - 143px);
+  flex: 1; margin-top: 121px; margin-bottom: 74px;
+  height: calc(100vh - 195px);
   /* スマホでアドレスバーの出し引きにより100vhが実際の表示領域より
      大きくなり、下部ナビに文章が隠れてしまうのを防ぐ（対応ブラウザのみ） */
-  height: calc(100dvh - 143px);
+  height: calc(100dvh - 195px);
   overflow: hidden; position: relative;
 }
 /* 高さ100%指定だと、レイアウトの都合で高さが0になってしまう場合があるため、
@@ -866,7 +889,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 }
 
 /* --- タイムライン（Ch10） --- */
-.itinerary-timeline { display: flex; flex-direction: column; gap: var(--space-m); border-left: 2px solid var(--color-gold-soft); padding-left: var(--space-m); }
+.itinerary-timeline { display: flex; flex-direction: column; gap: var(--space-m); border-left: 2px solid var(--color-gold-soft); padding-left: var(--space-m); margin-top: var(--space-m); }
 .timeline-item { position: relative; }
 .timeline-item::before {
   content: ""; position: absolute; left: calc(-1 * var(--space-m) - 6px); top: 6px;
@@ -1223,7 +1246,10 @@ ul { list-style: none; margin: 0; padding: 0; }
   .current-chapter-label { display: none; }
   .topbar-right { gap: 2px; }
   .icon-btn { width: 38px; height: 38px; font-size: .9rem; }
-  .slides-viewport { margin-top: 56px; margin-bottom: 66px; height: calc(100vh - 122px); height: calc(100dvh - 122px); }
+  .shortcut-bar { top: 58px; padding: 6px var(--space-s); gap: 6px; }
+  .shortcut-pill { padding: 7px 12px; font-size: .72rem; }
+  .progress-bar { top: 104px; }
+  .slides-viewport { margin-top: 107px; margin-bottom: 66px; height: calc(100vh - 173px); height: calc(100dvh - 173px); }
   .slide { padding: var(--space-m) var(--space-s); }
   .info-grid { grid-template-columns: repeat(2, 1fr); }
   .clothing-grid { grid-template-columns: 1fr; }
@@ -1242,6 +1268,11 @@ ul { list-style: none; margin: 0; padding: 0; }
   .topbar-logo { font-size: .72rem; }
   .icon-btn { width: 32px; height: 32px; font-size: .8rem; }
   .topbar-right { gap: 1px; overflow-x: auto; }
+  .shortcut-bar { top: 48px; }
+  .shortcut-pill-text { display: none; }
+  .shortcut-pill { padding: 8px; }
+  .progress-bar { top: 92px; }
+  .slides-viewport { margin-top: 95px; height: calc(100vh - 161px); height: calc(100dvh - 161px); }
 }
 
 /* ダークモード等での可読性のため、印刷時は非表示にする演出要素 */

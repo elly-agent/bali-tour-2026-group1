@@ -243,7 +243,6 @@ function finishOpeningToTitle(openingData) {
   openingEls.titleMain.textContent = openingData.titleMain;
   openingEls.titleSub.textContent = openingData.titleSub;
   openingEls.title.classList.remove("hidden");
-  startBgmAutoplay();
 }
 
 async function runOpeningSequence(data) {
@@ -251,6 +250,7 @@ async function runOpeningSequence(data) {
   const steps = opening.steps;
 
   openingEls.clouds.classList.add("is-visible");
+  startBgmAutoplay(); // 演出の冒頭からすぐにBGMを流し始める（終盤まで待たせない）
 
   // --- ステップ1〜3：宇宙 → 地球 → 日本が光る ---
   showCaption(steps[0]);
@@ -951,7 +951,9 @@ function renderMultilineText(container, text) {
 // この旅のテーマ・目的・効果（プロローグ画面）
 function renderPrologue(data) {
   const p = data.prologue;
-  document.getElementById("prologue-eyebrow").textContent = p.eyebrow;
+  const eyebrowEl = document.getElementById("prologue-eyebrow");
+  eyebrowEl.textContent = p.eyebrow;
+  eyebrowEl.classList.toggle("hidden", !p.eyebrow);
   document.getElementById("prologue-theme-label").textContent = p.themeLabel;
   renderMultilineText(document.getElementById("prologue-theme-text"), p.theme);
   document.getElementById("prologue-purpose-label").textContent = p.purposeLabel;
@@ -1386,6 +1388,7 @@ function setupNavigationEvents() {
   document.getElementById("btn-menu").addEventListener("click", openChapterMenu);
   document.getElementById("btn-close-menu").addEventListener("click", closeChapterMenu);
   document.getElementById("btn-bgm").addEventListener("click", () => toggleBgmMenu("btn-bgm"));
+  document.getElementById("btn-bgm-shortcut").addEventListener("click", () => toggleBgmMenu("btn-bgm-shortcut"));
   document.getElementById("bgm-menu-onoff").addEventListener("click", toggleBgm);
   document.getElementById("btn-autoplay").addEventListener("click", toggleAutoplay);
   document.getElementById("btn-fullscreen").addEventListener("click", toggleFullscreen);
@@ -1475,8 +1478,10 @@ function setupNavigationEvents() {
   // BGMメニューの外側をクリック/タップしたら閉じる
   document.addEventListener("click", (event) => {
     const bgmControl = document.querySelector(".bgm-control");
+    const bgmShortcut = document.getElementById("btn-bgm-shortcut");
     const inControl = bgmControl && bgmControl.contains(event.target);
-    if (!inControl) closeBgmMenu();
+    const inShortcut = bgmShortcut && bgmShortcut.contains(event.target);
+    if (!inControl && !inShortcut) closeBgmMenu();
   });
 }
 

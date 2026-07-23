@@ -174,8 +174,6 @@
     <div class="topbar-right">
       <button class="icon-btn" id="btn-home" title="ホーム">🏠</button>
       <button class="icon-btn" id="btn-menu" title="チャプター一覧">☰</button>
-      <button class="icon-btn" id="btn-today-schedule" title="今日の予定を見る">📅</button>
-      <button class="icon-btn" id="btn-weather-shortcut" title="天気・時間を見る">🌤️</button>
       <button class="icon-btn" id="btn-autoplay" title="自動再生 ON/OFF">▶️</button>
       <div class="bgm-control">
         <button class="icon-btn" id="btn-bgm" title="BGM ON/OFF">🎵</button>
@@ -192,6 +190,22 @@
       <button class="icon-btn" id="btn-fullscreen" title="フルスクリーン">⛶</button>
     </div>
   </header>
+
+  <!-- topbarのすぐ下、白い余白部分に常設する3つのショートカットボタン -->
+  <div class="shortcut-bar">
+    <button class="shortcut-pill shortcut-pill--bgm" id="btn-bgm-shortcut" type="button" title="BGMを変える">
+      <span class="shortcut-pill-icon">🎵</span>
+      <span class="shortcut-pill-text">BGM変更</span>
+    </button>
+    <button class="shortcut-pill shortcut-pill--today" id="btn-today-schedule" type="button" title="今日の予定を見る">
+      <span class="shortcut-pill-icon">📅</span>
+      <span class="shortcut-pill-text">今日の予定</span>
+    </button>
+    <button class="shortcut-pill shortcut-pill--weather" id="btn-weather-shortcut" type="button" title="天気・時間を見る">
+      <span class="shortcut-pill-icon">🌤️</span>
+      <span class="shortcut-pill-text">天気・時間</span>
+    </button>
+  </div>
 
   <!-- 進捗バー -->
   <div class="progress-bar">
