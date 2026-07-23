@@ -1057,12 +1057,11 @@ function updateTopbar(index) {
   });
 }
 
-// まだ下にスクロールできる場合だけ、ヒントを表示する
+// スクロールできる中身がある間は、スクロール位置にかかわらず常にヒントを表示する
 function updateScrollHint(slideEl) {
   const hint = document.getElementById("scroll-hint");
   const canScroll = slideEl.scrollHeight - slideEl.clientHeight > 24;
-  const atBottom = slideEl.scrollTop + slideEl.clientHeight >= slideEl.scrollHeight - 24;
-  hint.classList.toggle("hidden", !canScroll || atBottom);
+  hint.classList.toggle("hidden", !canScroll);
 }
 
 // 「今日の予定」ショートカット：旅程チャプターへ移動し、今日の日付のカードまでスクロールする

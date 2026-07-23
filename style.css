@@ -489,13 +489,22 @@ ul { list-style: none; margin: 0; padding: 0; }
   color: var(--color-white); font-size: .78rem; font-weight: 600; letter-spacing: .02em;
   box-shadow: 0 4px 12px rgba(0,0,0,.18);
   transition: transform var(--dur-fast) ease, box-shadow var(--dur-fast) ease;
+  animation: shortcut-float 2.6s ease-in-out infinite;
 }
-.shortcut-pill:hover { transform: translateY(-2px); }
+.shortcut-pill:hover { transform: translateY(-4px); animation-play-state: paused; }
 .shortcut-pill-icon { font-size: .95rem; }
-.shortcut-pill--bgm { background: var(--color-gold); }
-.shortcut-pill--today { background: var(--color-turquoise-deep); }
+.shortcut-pill--bgm { background: var(--color-gold); animation-delay: 0s; }
+.shortcut-pill--today { background: var(--color-turquoise-deep); animation-delay: .35s; }
 .shortcut-pill--today:hover { background: var(--color-turquoise); }
-.shortcut-pill--weather { background: var(--color-emerald); }
+.shortcut-pill--weather { background: var(--color-emerald); animation-delay: .7s; }
+
+@keyframes shortcut-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shortcut-pill { animation: none; }
+}
 
 /* BGM切り替えボタン：一目でON/OFFがわかるよう、状態に応じて見た目を大きく変える */
 #btn-bgm {
