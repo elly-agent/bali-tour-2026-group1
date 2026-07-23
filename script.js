@@ -1098,6 +1098,7 @@ function renderAllChapters(data) {
   renderRestaurants(data);
   renderEnding(data);
   buildChapterMenu(data);
+  addFavoriteStarsToChapterPages(data);
 }
 
 /* ============================================================
@@ -1237,10 +1238,25 @@ function saveFavorites(list) {
 }
 let showFavoritesOnly = false;
 
+// お気に入り☆ボタンを1つ作る共通関数（メニュー一覧・各チャプターページの両方で使う）
+function createFavoriteStarButton(chapterId, extraClass) {
+  const favorites = loadFavorites();
+  const starButton = el("button", "favorite-star-btn " + (extraClass || ""));
+  starButton.type = "button";
+  starButton.title = "お気に入りに登録";
+  starButton.dataset.chapterId = chapterId;
+  const isFav = favorites.indexOf(chapterId) !== -1;
+  starButton.textContent = isFav ? "★" : "☆";
+  starButton.classList.toggle("is-favorite", isFav);
+  starButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    toggleFavorite(chapterId);
+  });
+  return starButton;
+}
+
 function buildChapterMenu(data) {
   const grid = document.getElementById("chapter-menu-grid");
-  const emptyNote = document.getElementById("chapter-menu-empty");
-  const favorites = loadFavorites();
 
   data.chapters.forEach((chapter) => {
     const item = el("div", "chapter-menu-item");
@@ -1255,16 +1271,7 @@ function buildChapterMenu(data) {
       closeChapterMenu();
     });
 
-    const starButton = el("button", "chapter-menu-item-star");
-    starButton.type = "button";
-    starButton.title = "お気に入りに登録";
-    const isFav = favorites.indexOf(chapter.id) !== -1;
-    starButton.textContent = isFav ? "★" : "☆";
-    starButton.classList.toggle("is-favorite", isFav);
-    starButton.addEventListener("click", (event) => {
-      event.stopPropagation();
-      toggleFavorite(chapter.id, starButton, item);
-    });
+    const starButton = createFavoriteStarButton(chapter.id, "chapter-menu-item-star");
 
     item.appendChild(navButton);
     item.appendChild(starButton);
@@ -1280,19 +1287,33 @@ function buildChapterMenu(data) {
   });
 }
 
-function toggleFavorite(chapterId, starButton, item) {
+// 各チャプターページ自体にも、タイトルの近くにお気に入り☆を設置する
+function addFavoriteStarsToChapterPages(data) {
+  data.chapters.forEach((chapter) => {
+    const slide = document.getElementById("slide-" + chapter.number);
+    const inner = slide && slide.querySelector(".slide-inner");
+    if (!inner) return;
+    const starButton = createFavoriteStarButton(chapter.id, "chapter-page-star");
+    inner.appendChild(starButton);
+  });
+}
+
+function toggleFavorite(chapterId) {
   const favorites = loadFavorites();
   const index = favorites.indexOf(chapterId);
-  if (index === -1) {
+  const nowFavorite = index === -1;
+  if (nowFavorite) {
     favorites.push(chapterId);
-    starButton.textContent = "★";
-    starButton.classList.add("is-favorite");
   } else {
     favorites.splice(index, 1);
-    starButton.textContent = "☆";
-    starButton.classList.remove("is-favorite");
   }
   saveFavorites(favorites);
+
+  // メニュー一覧・チャプターページ、どちらの☆ボタンも同時に見た目を更新する
+  document.querySelectorAll('.favorite-star-btn[data-chapter-id="' + chapterId + '"]').forEach((btn) => {
+    btn.textContent = nowFavorite ? "★" : "☆";
+    btn.classList.toggle("is-favorite", nowFavorite);
+  });
   applyFavoritesFilter();
 }
 

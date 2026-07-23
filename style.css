@@ -602,7 +602,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 .slide.is-active { opacity: 1; visibility: visible; transform: translateX(0) scale(1); z-index: 2; }
 .slide.is-prev { transform: translateX(-40px) scale(.98); }
 
-.slide-inner { width: 100%; max-width: 880px; margin: auto; padding-bottom: var(--space-l); }
+.slide-inner { width: 100%; max-width: 880px; margin: auto; padding-bottom: var(--space-l); position: relative; }
 
 /* ブランドロゴマーク(OPA)：バリ島ってどこ？チャプターの冒頭に、控えめに配置 */
 .brand-mark { display: flex; justify-content: center; margin-bottom: var(--space-m); }
@@ -1294,12 +1294,19 @@ ul { list-style: none; margin: 0; padding: 0; }
 }
 .chapter-menu-item .m-num { font-size: .7rem; color: var(--color-gold); flex-shrink: 0; min-width: 32px; }
 .chapter-menu-item .m-title { font-size: .88rem; color: var(--color-ink); white-space: pre-line; }
-.chapter-menu-item-star {
-  flex-shrink: 0; font-size: 1.2rem; padding: 10px 14px; color: var(--color-ink-soft);
-  transition: transform var(--dur-fast) ease;
+.favorite-star-btn {
+  color: var(--color-ink-soft); transition: transform var(--dur-fast) ease, color var(--dur-fast) ease;
 }
-.chapter-menu-item-star:hover { transform: scale(1.15); }
-.chapter-menu-item-star.is-favorite { color: var(--color-gold); }
+.favorite-star-btn:hover { transform: scale(1.15); }
+.favorite-star-btn.is-favorite { color: var(--color-gold); }
+.chapter-menu-item-star { flex-shrink: 0; font-size: 1.2rem; padding: 10px 14px; }
+
+/* 各チャプターページのタイトル付近に置く、お気に入り☆ボタン */
+.chapter-page-star {
+  position: absolute; top: var(--space-m); right: var(--space-m);
+  font-size: 1.5rem; z-index: 4;
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,.15));
+}
 .chapter-menu-item.is-current { background: var(--color-turquoise); }
 .chapter-menu-item.is-current .m-num,
 .chapter-menu-item.is-current .m-title { color: var(--color-white); }
