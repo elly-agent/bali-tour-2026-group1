@@ -1457,22 +1457,29 @@ function closeChapterMenu() {
 // スマホ(特にiOS Safari)は「操作(タップ)から間を置いて呼び出したplay()」を
 // ブロックすることがある。オープニング演出は最初のクリックから数秒後に効果音を
 // 鳴らすため、ブロックされた場合は次のタップ/クリックで鳴らし直す（BGMと同じ仕組み）。
+// 戻り値は、この「次のタップで鳴らし直す」予約を取り消すための関数
+// （場面が切り替わった後に、無関係なタイミングで突然鳴り出すのを防ぐため）。
 function playSfxWithUnlockRetry(sfx, volume) {
   sfx.currentTime = 0;
   sfx.volume = volume;
+  let cancelRetry = () => {};
   const playPromise = sfx.play();
   if (playPromise && playPromise.catch) {
     playPromise.catch(() => {
       const retry = () => {
         sfx.currentTime = 0;
         sfx.play().catch(() => {});
-        document.removeEventListener("click", retry);
-        document.removeEventListener("touchstart", retry);
+        cancelRetry();
       };
       document.addEventListener("click", retry, { once: true });
       document.addEventListener("touchstart", retry, { once: true });
+      cancelRetry = () => {
+        document.removeEventListener("click", retry);
+        document.removeEventListener("touchstart", retry);
+      };
     });
   }
+  return () => cancelRetry();
 }
 
 // 効果音をフェードアウトさせながら止める関数を作る（要素ごとに専用のタイマーを持たせるため、
@@ -1506,20 +1513,26 @@ function makeSfxFader(elId) {
 }
 const planeSfxFader = makeSfxFader("sfx-plane");
 const flyingSfxFader = makeSfxFader("sfx-flying");
+let cancelPlaneSfxRetry = () => {};
+let cancelFlyingSfxRetry = () => {};
 
 function playTakeoffSfx() {
   planeSfxFader.cancelFade();
-  playSfxWithUnlockRetry(document.getElementById("sfx-plane"), 0.7);
+  cancelPlaneSfxRetry = playSfxWithUnlockRetry(document.getElementById("sfx-plane"), 0.7);
 }
 
 // 飛行機が画面を飛んでいる間、ずっと流れる「飛行音」
 function playFlyingSfx() {
   flyingSfxFader.cancelFade();
-  playSfxWithUnlockRetry(document.getElementById("sfx-flying"), 0.6);
+  cancelFlyingSfxRetry = playSfxWithUnlockRetry(document.getElementById("sfx-flying"), 0.6);
 }
 
-// 離陸音・飛行音のどちらも、ふっと消えるようにフェードアウトさせて止める
+// 離陸音・飛行音のどちらも、ふっと消えるようにフェードアウトさせて止める。
+// 「次のタップで鳴らし直す」という保留中の予約があれば、それも一緒に取り消す
+// （そうしないと、飛行機の場面が終わった後の無関係な画面で急に鳴り出してしまう）。
 function stopFlyingSfx() {
+  cancelPlaneSfxRetry();
+  cancelFlyingSfxRetry();
   planeSfxFader.fadeOut(700);
   flyingSfxFader.fadeOut(700);
 }
