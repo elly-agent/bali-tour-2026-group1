@@ -1857,8 +1857,11 @@ async function init() {
     // 最初の一回だけ、演出前にタップしてもらう（このタップを合図にBGM・効果音を
     // 鳴らし始めることで、スマホでも演出と音のタイミングがずれないようにする）
     document.getElementById("btn-tap-gate").addEventListener("click", () => {
-      unlockAudioElements(); // このタップの中で全ての音声を一度「解錠」しておく
-      openingEls.tapGate.classList.add("is-hidden");
+      // CSSクラスの切り替えだけだと、何らかの理由で残ってしまった場合に
+      // 画面全体を覆う透明レイヤーとしてタップを吸い取ってしまう恐れがあるため、
+      // DOMから完全に取り除いて二度と邪魔をしないようにする。
+      openingEls.tapGate.remove();
+      try { unlockAudioElements(); } catch (e) {} // このタップの中で全ての音声を一度「解錠」しておく
       runOpeningSequence(data);
     }, { once: true });
   }
