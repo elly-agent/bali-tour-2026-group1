@@ -29,6 +29,22 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// 要素のscrollTopを自前でアニメーションさせる。ブラウザ標準の
+// scrollBy({behavior:"smooth"}) はスマホのブラウザで反応しないことがあるため使わない。
+function smoothScrollBy(el, deltaY, durationMs) {
+  const startY = el.scrollTop;
+  const maxY = el.scrollHeight - el.clientHeight;
+  const targetY = Math.max(0, Math.min(startY + deltaY, maxY));
+  const startTime = performance.now();
+  function step(now) {
+    const t = Math.min(1, (now - startTime) / durationMs);
+    const eased = 1 - Math.pow(1 - t, 3); // ease-out
+    el.scrollTop = startY + (targetY - startY) * eased;
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
 // "a.b.c" のような文字列で、オブジェクトの奥の値を取り出す
 function getByPath(obj, path) {
   return path.split(".").reduce((acc, key) => {
@@ -1793,11 +1809,13 @@ function setupNavigationEvents() {
     if (event.target.id === "checklist-complete-popup") closeChecklistCompletePopup();
   });
 
-  // 「下にスクロール」ボタン：タップで現在のチャプターを1画面分下へスクロールする
+  // 「下にスクロール」ボタン：タップで現在のチャプターを1画面分下へスクロールする。
+  // ブラウザ標準の scrollBy({behavior:"smooth"}) は、スマホ(特にiOS Safari)の
+  // 縦長コンテンツで反応しないことがあるため、自前でアニメーションさせて確実に動かす。
   document.getElementById("scroll-hint").addEventListener("click", () => {
     const activeSlide = document.querySelector(".slide.is-active");
     if (!activeSlide) return;
-    activeSlide.scrollBy({ top: activeSlide.clientHeight * 0.75, behavior: "smooth" });
+    smoothScrollBy(activeSlide, activeSlide.clientHeight * 0.75, 450);
   });
 
   // スクロールに合わせて、ヒントの表示/非表示をリアルタイムに切り替える

@@ -63,7 +63,9 @@ h1, h2, h3 {
   margin: 0;
 }
 
-p { margin: 0; line-height: 1.9; }
+/* text-wrap:pretty は、段落の最後の行に文字が1〜2文字だけ孤立するのを
+   避けてくれる（対応ブラウザのみ。未対応でも見た目は崩れない） */
+p { margin: 0; line-height: 1.9; text-wrap: pretty; }
 img { max-width: 100%; display: block; }
 button {
   font-family: var(--font-body);
@@ -420,9 +422,12 @@ ul { list-style: none; margin: 0; padding: 0; }
   font-family: var(--font-heading); font-size: clamp(.95rem, 2.6vh, 1.25rem); font-weight: 700; letter-spacing: .2em;
   color: var(--color-turquoise); margin-bottom: clamp(6px, 1.5vh, 14px);
 }
+/* 画面の高さ(vh)だけで文字を決めると、縦長で横幅の狭いスマホでは折り返し位置が
+   悪くなり(例:「〜そこを」の「を」だけが次の行に孤立する等)、書き手が意図した
+   改行(\n)と食い違ってしまう。横幅(vw)も一緒に見て、狭い方に合わせて縮める。 */
 .prologue-text {
-  font-family: var(--font-heading); font-size: clamp(1rem, 3.4vh, 1.42rem); line-height: 1.5; letter-spacing: .03em;
-  color: var(--color-white);
+  font-family: var(--font-heading); font-size: clamp(.95rem, min(3.4vh, 4.6vw), 1.42rem); line-height: 1.5; letter-spacing: .03em;
+  color: var(--color-white); text-wrap: pretty;
 }
 /* タイプライター演出の途中でも、動く文字を目で追いやすいようにカーソルを添える */
 .prologue-block.is-typing .prologue-text::after {
@@ -448,8 +453,8 @@ ul { list-style: none; margin: 0; padding: 0; }
 }
 .prologue-summary-text {
   font-family: var(--font-heading); line-height: 1.4; letter-spacing: .02em;
-  font-size: clamp(.74rem, 2vh, .95rem);
-  color: var(--color-white);
+  font-size: clamp(.68rem, min(2vh, 4vw), .95rem);
+  color: var(--color-white); text-wrap: pretty;
 }
 .opening-prologue .btn-primary {
   flex: none; margin-top: clamp(8px, 2vh, var(--space-m)); margin-bottom: 0;
