@@ -1865,3 +1865,11 @@ async function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+
+// スマホ(特にiOS Safari)の「戻る」操作等で、ページがゼロから読み込み直されず、
+// 以前の画面状態のスナップショットがそのまま復元される(bfcache)ことがある。
+// これだとオープニング演出の途中の状態が壊れて見えることがあるため、
+// 復元された場合は必ず最初から読み込み直す。
+window.addEventListener("pageshow", (event) => {
+  if (event.persisted) location.reload();
+});
