@@ -180,7 +180,6 @@ function cacheOpeningEls() {
   openingEls.arrivalGreeting = document.getElementById("arrival-greeting");
   openingEls.arrivalSub = document.getElementById("arrival-sub");
   openingEls.title = document.getElementById("opening-title");
-  openingEls.prologue = document.getElementById("opening-prologue");
   openingEls.titleProducer = document.getElementById("opening-title-producer");
   openingEls.titleMain = document.getElementById("opening-title-main");
   openingEls.titleSub = document.getElementById("opening-title-sub");
@@ -1095,115 +1094,30 @@ function renderMultilineText(container, text) {
   });
 }
 
-// この旅のテーマ・目的・効果（プロローグ画面）
-function renderPrologue(data) {
+// --- Chapter 1: 旅のテーマ ---
+// テーマ・目的・効果を、他のチャプターと同じ通常のページとして表示する
+function renderThemeMessage(data) {
   const p = data.prologue;
-  const eyebrowEl = document.getElementById("prologue-eyebrow");
-  eyebrowEl.textContent = p.eyebrow;
-  eyebrowEl.classList.toggle("hidden", !p.eyebrow);
+  const wrap = document.getElementById("theme-message-blocks");
+  wrap.innerHTML = "";
 
-  // ひとつずつ表示する側：文字はJS側でタイプライター表示するので、ここでは
-  // 元の文章をdata属性に持たせておくだけにする（中身は空のまま）
-  document.getElementById("prologue-theme-label").textContent = p.themeLabel;
-  document.getElementById("prologue-theme-text").dataset.fullText = p.theme;
-  document.getElementById("prologue-purpose-label").textContent = p.purposeLabel;
-  document.getElementById("prologue-purpose-text").dataset.fullText = p.purpose;
-  document.getElementById("prologue-effect-label").textContent = p.effectLabel;
-  document.getElementById("prologue-effect-text").dataset.fullText = p.effect;
-
-  // 最後にまとめて表示する側：最初から全文を入れておく
-  document.getElementById("prologue-summary-theme-label").textContent = p.themeLabel;
-  renderMultilineText(document.getElementById("prologue-summary-theme-text"), p.theme);
-  document.getElementById("prologue-summary-purpose-label").textContent = p.purposeLabel;
-  renderMultilineText(document.getElementById("prologue-summary-purpose-text"), p.purpose);
-  document.getElementById("prologue-summary-effect-label").textContent = p.effectLabel;
-  renderMultilineText(document.getElementById("prologue-summary-effect-text"), p.effect);
-
-  document.getElementById("btn-start-prologue").textContent = p.buttonLabel;
-}
-
-// 1文字ずつ流し込むタイプライター表示。改行(\n)は<br>として扱う。
-// isCurrent() が false を返した時点（別の演出に切り替わった等）で即座に打ち切る。
-function typewriterInto(el, text, msPerChar, isCurrent) {
-  return new Promise((resolve) => {
-    el.textContent = "";
-    const lines = text.split("\n");
-    let li = 0;
-    let ci = 0;
-    function step() {
-      if (!isCurrent()) return resolve();
-      if (li >= lines.length) return resolve();
-      const line = lines[li];
-      if (ci < line.length) {
-        el.appendChild(document.createTextNode(line[ci]));
-        ci++;
-        setTimeout(step, msPerChar);
-      } else {
-        li++;
-        ci = 0;
-        if (li < lines.length) el.appendChild(document.createElement("br"));
-        setTimeout(step, msPerChar);
-      }
-    }
-    step();
+  [
+    [p.themeLabel, p.theme],
+    [p.purposeLabel, p.purpose],
+    [p.effectLabel, p.effect],
+  ].forEach(([label, text]) => {
+    const block = el("div", "theme-message-block");
+    block.appendChild(el("p", "theme-message-label", label));
+    const textEl = el("p", "theme-message-text");
+    renderMultilineText(textEl, text);
+    block.appendChild(textEl);
+    wrap.appendChild(block);
   });
-}
-
-// テーマ→目的→効果の順に、ひとつずつタイプライターで浮かび上がっては消える演出。
-// 最後まで読み終えたら、全文をまとめて表示し、旅を始めるボタンを添える
-// （アニメーションの速さについていけない人も、ここで落ち着いて読める）。
-let prologueRunId = 0;
-async function runPrologueSequence() {
-  const myRunId = ++prologueRunId;
-  const isCurrent = () => prologueRunId === myRunId;
-
-  const prologueEl = openingEls.prologue;
-  const blocks = Array.from(document.querySelectorAll("#opening-prologue .prologue-block"));
-  const startBtn = document.getElementById("btn-start-prologue");
-  const summaryEl = document.getElementById("prologue-summary");
-
-  prologueEl.classList.remove("is-summary");
-  summaryEl.classList.add("hidden");
-  blocks.forEach((b) => { b.classList.remove("is-visible"); b.classList.remove("is-typing"); });
-  startBtn.classList.remove("is-visible");
-
-  const MS_PER_CHAR = 85;
-  const PRE_TYPE_DELAY = 700;
-  const PAUSE_AFTER_TYPE = 2600;
-
-  await sleep(600);
-  if (!isCurrent()) return;
-
-  for (const block of blocks) {
-    if (!isCurrent()) return;
-    blocks.forEach((b) => { b.classList.remove("is-visible"); b.classList.remove("is-typing"); });
-    block.classList.add("is-visible");
-    const textEl = block.querySelector(".prologue-text");
-
-    await sleep(PRE_TYPE_DELAY);
-    if (!isCurrent()) return;
-
-    block.classList.add("is-typing");
-    await typewriterInto(textEl, textEl.dataset.fullText || "", MS_PER_CHAR, isCurrent);
-    if (!isCurrent()) return;
-    block.classList.remove("is-typing");
-
-    await sleep(PAUSE_AFTER_TYPE);
-  }
-  if (!isCurrent()) return;
-
-  blocks.forEach((b) => b.classList.remove("is-visible"));
-  await sleep(700);
-  if (!isCurrent()) return;
-
-  prologueEl.classList.add("is-summary");
-  summaryEl.classList.remove("hidden");
-  startBtn.classList.add("is-visible");
 }
 
 function renderAllChapters(data) {
   applyDataBindings(data);
-  renderPrologue(data);
+  renderThemeMessage(data);
   renderWorldMap(data);
   renderBasicInfo(data);
   renderStory(data.religion.paragraphs, data.religion.keywords, "religion-text", "religion-keywords");
@@ -1556,13 +1470,13 @@ let cancelFlyingSfxRetry = () => {};
 
 function playTakeoffSfx() {
   planeSfxFader.cancelFade();
-  cancelPlaneSfxRetry = playSfxWithUnlockRetry(document.getElementById("sfx-plane"), 0.7);
+  cancelPlaneSfxRetry = playSfxWithUnlockRetry(document.getElementById("sfx-plane"), 0.56);
 }
 
 // 飛行機が画面を飛んでいる間、ずっと流れる「飛行音」
 function playFlyingSfx() {
   flyingSfxFader.cancelFade();
-  cancelFlyingSfxRetry = playSfxWithUnlockRetry(document.getElementById("sfx-flying"), 0.6);
+  cancelFlyingSfxRetry = playSfxWithUnlockRetry(document.getElementById("sfx-flying"), 0.48);
 }
 
 // 離陸音・飛行音のどちらも、ふっと消えるようにフェードアウトさせて止める。
@@ -1884,7 +1798,6 @@ function setupNavigationEvents() {
 
 function resetOpeningVisuals() {
   stopFlyingSfx();
-  prologueRunId++; // 進行中のプロローグ演出(タイプライター等)があれば打ち切る
   openingEls.earthScene.classList.remove("is-fading");
   openingEls.japanGlow.classList.remove("is-lit");
   openingEls.baliGlow.classList.remove("is-lit");
@@ -1897,17 +1810,11 @@ function resetOpeningVisuals() {
   openingEls.arrival.classList.add("hidden");
   openingEls.shootingStars.classList.remove("is-active");
   openingEls.title.classList.add("hidden");
-  openingEls.prologue.classList.add("hidden");
   openingEls.captionWrap.classList.remove("hidden");
 }
 
 function setupOpeningEntry() {
-  document.getElementById("btn-start-experience").addEventListener("click", () => {
-    openingEls.title.classList.add("hidden");
-    openingEls.prologue.classList.remove("hidden");
-    runPrologueSequence();
-  });
-  document.getElementById("btn-start-prologue").addEventListener("click", enterMainApp);
+  document.getElementById("btn-start-experience").addEventListener("click", enterMainApp);
 }
 
 // topbar・shortcut-barの実際の高さをCSS変数に反映する。

@@ -137,50 +137,11 @@
       <p class="opening-title-sub" id="opening-title-sub"></p>
       <button class="btn-primary" id="btn-start-experience">あなたの旅を開く</button>
     </div>
-
-    <!-- この旅のテーマ・目的・効果（チャプター1に入る前に、旅への大切なメッセージとして受け取ってもらう） -->
-    <div class="opening-prologue hidden" id="opening-prologue">
-      <div class="prologue-logo">
-        <img src="assets/images/opa-logo-mark.png" alt="OPA - One Point Advice" class="prologue-logo-img">
-      </div>
-      <div class="prologue-scroll">
-        <p class="prologue-eyebrow" id="prologue-eyebrow"></p>
-        <div class="prologue-block">
-          <p class="prologue-label" id="prologue-theme-label"></p>
-          <p class="prologue-text" id="prologue-theme-text"></p>
-        </div>
-        <div class="prologue-block">
-          <p class="prologue-label" id="prologue-purpose-label"></p>
-          <p class="prologue-text" id="prologue-purpose-text"></p>
-        </div>
-        <div class="prologue-block">
-          <p class="prologue-label" id="prologue-effect-label"></p>
-          <p class="prologue-text" id="prologue-effect-text"></p>
-        </div>
-
-        <!-- 最後に全文をまとめて表示（アニメーションを待たなくても、ここで一度に読める） -->
-        <div class="prologue-summary hidden" id="prologue-summary">
-          <div class="prologue-summary-block">
-            <p class="prologue-summary-label" id="prologue-summary-theme-label"></p>
-            <p class="prologue-summary-text" id="prologue-summary-theme-text"></p>
-          </div>
-          <div class="prologue-summary-block">
-            <p class="prologue-summary-label" id="prologue-summary-purpose-label"></p>
-            <p class="prologue-summary-text" id="prologue-summary-purpose-text"></p>
-          </div>
-          <div class="prologue-summary-block">
-            <p class="prologue-summary-label" id="prologue-summary-effect-label"></p>
-            <p class="prologue-summary-text" id="prologue-summary-effect-text"></p>
-          </div>
-        </div>
-      </div>
-      <button class="btn-primary" id="btn-start-prologue"></button>
-    </div>
   </div>
 </div>
 
 <!-- ============================================================
-     メイン体験（本編：チャプター1〜18＋エンディング）
+     メイン体験（本編：チャプター1〜20＋エンディング）
      ============================================================ -->
 <div id="app" class="app app-hidden">
 
@@ -237,13 +198,22 @@
   <main id="slides-viewport" class="slides-viewport">
     <div id="slides-track" class="slides-track">
 
-      <!-- ============ Chapter 1: バリ島ってどこ？ ============ -->
-      <section class="slide" data-chapter="1" data-type="world-map" id="slide-1">
+      <!-- ============ Chapter 1: 旅のテーマ ============ -->
+      <section class="slide" data-chapter="1" data-type="theme" id="slide-1">
+        <div class="slide-inner reveal-group">
+          <p class="chapter-eyebrow reveal">Chapter 01</p>
+          <h2 class="chapter-title reveal" data-bind="chapterTitle:theme-intro"></h2>
+          <div class="theme-message-blocks" id="theme-message-blocks"></div>
+        </div>
+      </section>
+
+      <!-- ============ Chapter 2: バリ島ってどこ？ ============ -->
+      <section class="slide" data-chapter="2" data-type="world-map" id="slide-2">
         <div class="slide-inner reveal-group">
           <div class="brand-mark reveal">
             <img src="assets/images/opa-logo-mark.png" alt="OPA - One Point Advice" class="brand-mark-img">
           </div>
-          <p class="chapter-eyebrow reveal">Chapter 01</p>
+          <p class="chapter-eyebrow reveal">Chapter 02</p>
           <h2 class="chapter-title reveal" data-bind="chapterTitle:map-intro"></h2>
           <p class="chapter-lead reveal" data-bind="worldMap.description"></p>
 
@@ -303,19 +273,19 @@
         </div>
       </section>
 
-      <!-- ============ Chapter 2: バリ島基本情報 ============ -->
-      <section class="slide" data-chapter="2" data-type="basic-info" id="slide-2">
+      <!-- ============ Chapter 3: バリ島基本情報 ============ -->
+      <section class="slide" data-chapter="3" data-type="basic-info" id="slide-3">
         <div class="slide-inner reveal-group">
-          <p class="chapter-eyebrow reveal">Chapter 02</p>
+          <p class="chapter-eyebrow reveal">Chapter 03</p>
           <h2 class="chapter-title reveal" data-bind="chapterTitle:basic-info"></h2>
           <div class="info-grid" id="basic-info-grid"></div>
         </div>
       </section>
 
-      <!-- ============ Chapter 3: 宗教 ============ -->
-      <section class="slide" data-chapter="3" data-type="story" id="slide-3">
+      <!-- ============ Chapter 4: 宗教 ============ -->
+      <section class="slide" data-chapter="4" data-type="story" id="slide-4">
         <div class="slide-inner reveal-group">
-          <p class="chapter-eyebrow reveal">Chapter 03</p>
+          <p class="chapter-eyebrow reveal">Chapter 04</p>
           <h2 class="chapter-title reveal" data-bind="chapterTitle:religion"></h2>
           <div class="incense" aria-hidden="true">
             <span class="incense-smoke s1"></span>
@@ -330,10 +300,10 @@
         </div>
       </section>
 
-      <!-- ============ Chapter 4: バリの人々 ============ -->
-      <section class="slide" data-chapter="4" data-type="story" id="slide-4">
+      <!-- ============ Chapter 5: バリの人々 ============ -->
+      <section class="slide" data-chapter="5" data-type="story" id="slide-5">
         <div class="slide-inner reveal-group">
-          <p class="chapter-eyebrow reveal">Chapter 04</p>
+          <p class="chapter-eyebrow reveal">Chapter 05</p>
           <h2 class="chapter-title reveal" data-bind="chapterTitle:people"></h2>
           <div class="story-image reveal">
             <img data-src="assets/images/bali-people.jpg" alt="バリの人々" class="ph-img">
@@ -343,38 +313,38 @@
         </div>
       </section>
 
-      <!-- ============ Chapter 5: グルメ ============ -->
-      <section class="slide" data-chapter="5" data-type="gourmet" id="slide-5">
+      <!-- ============ Chapter 6: グルメ ============ -->
+      <section class="slide" data-chapter="6" data-type="gourmet" id="slide-6">
         <div class="slide-inner reveal-group">
-          <p class="chapter-eyebrow reveal">Chapter 05</p>
+          <p class="chapter-eyebrow reveal">Chapter 06</p>
           <h2 class="chapter-title reveal" data-bind="chapterTitle:gourmet"></h2>
           <div class="gourmet-grid" id="gourmet-grid"></div>
         </div>
       </section>
 
-      <!-- ============ Chapter 6: バリの見どころ ============ -->
-      <section class="slide" data-chapter="6" data-type="spots" id="slide-6">
+      <!-- ============ Chapter 7: バリの見どころ ============ -->
+      <section class="slide" data-chapter="7" data-type="spots" id="slide-7">
         <div class="slide-inner reveal-group">
-          <p class="chapter-eyebrow reveal">Chapter 06</p>
+          <p class="chapter-eyebrow reveal">Chapter 07</p>
           <h2 class="chapter-title reveal" data-bind="chapterTitle:spots"></h2>
           <p class="chapter-lead reveal">旅先で出会う、主な名所・名物をご紹介します。</p>
           <div class="spots-grid" id="spots-grid"></div>
         </div>
       </section>
 
-      <!-- ============ Chapter 7: フォトギャラリー ============ -->
-      <section class="slide" data-chapter="7" data-type="gallery" id="slide-7">
+      <!-- ============ Chapter 8: フォトギャラリー ============ -->
+      <section class="slide" data-chapter="8" data-type="gallery" id="slide-8">
         <div class="slide-inner reveal-group">
-          <p class="chapter-eyebrow reveal">Chapter 07</p>
+          <p class="chapter-eyebrow reveal">Chapter 08</p>
           <h2 class="chapter-title reveal" data-bind="chapterTitle:gallery"></h2>
           <div class="gallery-grid" id="gallery-grid"></div>
         </div>
       </section>
 
-      <!-- ============ Chapter 8: MAP ============ -->
-      <section class="slide" data-chapter="8" data-type="route-map" id="slide-8">
+      <!-- ============ Chapter 9: MAP ============ -->
+      <section class="slide" data-chapter="9" data-type="route-map" id="slide-9">
         <div class="slide-inner reveal-group">
-          <p class="chapter-eyebrow reveal">Chapter 08</p>
+          <p class="chapter-eyebrow reveal">Chapter 09</p>
           <h2 class="chapter-title reveal" data-bind="chapterTitle:map"></h2>
           <p class="chapter-lead reveal" data-bind="routeMap.description"></p>
 
@@ -415,10 +385,10 @@
         </div>
       </section>
 
-      <!-- ============ Chapter 9: 旅行の流れ ============ -->
-      <section class="slide" data-chapter="9" data-type="itinerary" id="slide-9">
+      <!-- ============ Chapter 10: 旅行の流れ ============ -->
+      <section class="slide" data-chapter="10" data-type="itinerary" id="slide-10">
         <div class="slide-inner reveal-group">
-          <p class="chapter-eyebrow reveal">Chapter 09</p>
+          <p class="chapter-eyebrow reveal">Chapter 10</p>
           <div class="chapter-title-row reveal">
             <h2 class="chapter-title" data-bind="chapterTitle:itinerary"></h2>
             <button class="opa-daily-btn" id="btn-lucky-opa-itinerary" type="button">
@@ -430,39 +400,39 @@
         </div>
       </section>
 
-      <!-- ============ Chapter 10: ホテル紹介 ============ -->
-      <section class="slide" data-chapter="10" data-type="hotels" id="slide-10">
+      <!-- ============ Chapter 11: ホテル紹介 ============ -->
+      <section class="slide" data-chapter="11" data-type="hotels" id="slide-11">
         <div class="slide-inner reveal-group">
-          <p class="chapter-eyebrow reveal">Chapter 10</p>
+          <p class="chapter-eyebrow reveal">Chapter 11</p>
           <h2 class="chapter-title reveal" data-bind="chapterTitle:hotels"></h2>
           <div class="hotel-grid" id="hotel-grid"></div>
         </div>
       </section>
 
-      <!-- ============ Chapter 11: レストラン紹介 ============ -->
-      <section class="slide" data-chapter="11" data-type="restaurants" id="slide-11">
+      <!-- ============ Chapter 12: レストラン紹介 ============ -->
+      <section class="slide" data-chapter="12" data-type="restaurants" id="slide-12">
         <div class="slide-inner reveal-group">
-          <p class="chapter-eyebrow reveal">Chapter 11</p>
+          <p class="chapter-eyebrow reveal">Chapter 12</p>
           <h2 class="chapter-title reveal" data-bind="chapterTitle:restaurants"></h2>
           <p class="chapter-lead reveal">旅の途中で立ち寄る予定のお店をご紹介します。</p>
           <div class="restaurant-grid" id="restaurant-grid"></div>
         </div>
       </section>
 
-      <!-- ============ Chapter 12: 言語 ============ -->
-      <section class="slide" data-chapter="12" data-type="phrases" id="slide-12">
+      <!-- ============ Chapter 13: 言語 ============ -->
+      <section class="slide" data-chapter="13" data-type="phrases" id="slide-13">
         <div class="slide-inner reveal-group">
-          <p class="chapter-eyebrow reveal">Chapter 12</p>
+          <p class="chapter-eyebrow reveal">Chapter 13</p>
           <h2 class="chapter-title reveal" data-bind="chapterTitle:language"></h2>
           <p class="chapter-lead reveal">旅先で使える、かんたんなあいさつ集です。</p>
           <div class="phrase-cards" id="phrase-cards"></div>
         </div>
       </section>
 
-      <!-- ============ Chapter 13: 通貨 ============ -->
-      <section class="slide" data-chapter="13" data-type="currency" id="slide-13">
+      <!-- ============ Chapter 14: 通貨 ============ -->
+      <section class="slide" data-chapter="14" data-type="currency" id="slide-14">
         <div class="slide-inner reveal-group">
-          <p class="chapter-eyebrow reveal">Chapter 13</p>
+          <p class="chapter-eyebrow reveal">Chapter 14</p>
           <h2 class="chapter-title reveal" data-bind="chapterTitle:currency"></h2>
           <p class="chapter-lead reveal" data-bind="currency.description"></p>
 
@@ -494,10 +464,10 @@
         </div>
       </section>
 
-      <!-- ============ Chapter 14: 値切り文化 ============ -->
-      <section class="slide" data-chapter="14" data-type="bargain" id="slide-14">
+      <!-- ============ Chapter 15: 値切り文化 ============ -->
+      <section class="slide" data-chapter="15" data-type="bargain" id="slide-15">
         <div class="slide-inner reveal-group">
-          <p class="chapter-eyebrow reveal">Chapter 14</p>
+          <p class="chapter-eyebrow reveal">Chapter 15</p>
           <h2 class="chapter-title reveal" data-bind="chapterTitle:bargain"></h2>
           <div class="story-image reveal">
             <img data-src="assets/images/market.jpg" alt="バリの市場" class="ph-img">
@@ -507,19 +477,19 @@
         </div>
       </section>
 
-      <!-- ============ Chapter 15: 服装 ============ -->
-      <section class="slide" data-chapter="15" data-type="clothing" id="slide-15">
+      <!-- ============ Chapter 16: 服装 ============ -->
+      <section class="slide" data-chapter="16" data-type="clothing" id="slide-16">
         <div class="slide-inner reveal-group">
-          <p class="chapter-eyebrow reveal">Chapter 15</p>
+          <p class="chapter-eyebrow reveal">Chapter 16</p>
           <h2 class="chapter-title reveal" data-bind="chapterTitle:clothing"></h2>
           <div class="clothing-grid" id="clothing-grid"></div>
         </div>
       </section>
 
-      <!-- ============ Chapter 16: バリ豆知識 ============ -->
-      <section class="slide" data-chapter="16" data-type="trivia" id="slide-16">
+      <!-- ============ Chapter 17: バリ豆知識 ============ -->
+      <section class="slide" data-chapter="17" data-type="trivia" id="slide-17">
         <div class="slide-inner reveal-group">
-          <p class="chapter-eyebrow reveal">Chapter 16</p>
+          <p class="chapter-eyebrow reveal">Chapter 17</p>
           <h2 class="chapter-title reveal" data-bind="chapterTitle:trivia"></h2>
           <div class="trivia-card-wrap reveal">
             <div class="trivia-card" id="trivia-card">
@@ -530,19 +500,19 @@
         </div>
       </section>
 
-      <!-- ============ Chapter 17: FAQ ============ -->
-      <section class="slide" data-chapter="17" data-type="faq" id="slide-17">
+      <!-- ============ Chapter 18: FAQ ============ -->
+      <section class="slide" data-chapter="18" data-type="faq" id="slide-18">
         <div class="slide-inner reveal-group">
-          <p class="chapter-eyebrow reveal">Chapter 17</p>
+          <p class="chapter-eyebrow reveal">Chapter 18</p>
           <h2 class="chapter-title reveal" data-bind="chapterTitle:faq"></h2>
           <div class="faq-list" id="faq-list"></div>
         </div>
       </section>
 
-      <!-- ============ Chapter 18: 持ち物チェックリスト ============ -->
-      <section class="slide" data-chapter="18" data-type="checklist" id="slide-18">
+      <!-- ============ Chapter 19: 持ち物チェックリスト ============ -->
+      <section class="slide" data-chapter="19" data-type="checklist" id="slide-19">
         <div class="slide-inner reveal-group">
-          <p class="chapter-eyebrow reveal">Chapter 18</p>
+          <p class="chapter-eyebrow reveal">Chapter 19</p>
           <h2 class="chapter-title reveal" data-bind="chapterTitle:packing"></h2>
           <p class="chapter-lead reveal">チェックした内容は、この端末に自動保存されます。</p>
           <div id="packing-checklist-groups"></div>
@@ -550,13 +520,13 @@
         </div>
       </section>
 
-      <!-- ============ Chapter 19: SATORU会 公式LINE ============ -->
-      <section class="slide" data-chapter="19" data-type="line" id="slide-19">
+      <!-- ============ Chapter 20: SATORU会 公式LINE ============ -->
+      <section class="slide" data-chapter="20" data-type="line" id="slide-20">
         <div class="slide-inner reveal-group">
           <div class="brand-mark reveal">
             <img src="assets/images/opa-logo-mark.png" alt="OPA - One Point Advice" class="brand-mark-img">
           </div>
-          <p class="chapter-eyebrow reveal">Chapter 19</p>
+          <p class="chapter-eyebrow reveal">Chapter 20</p>
           <h2 class="chapter-title reveal" data-bind="chapterTitle:line"></h2>
           <p class="chapter-lead reveal" data-bind="lineChapter.lead"></p>
 
@@ -569,7 +539,7 @@
       </section>
 
       <!-- ============ エンディング ============ -->
-      <section class="slide slide--ending" data-chapter="20" data-type="ending" id="slide-20">
+      <section class="slide slide--ending" data-chapter="21" data-type="ending" id="slide-21">
         <div class="ending-sun" aria-hidden="true"></div>
         <div class="ending-plane" aria-hidden="true">✈️</div>
         <div class="slide-inner reveal-group ending-inner">
