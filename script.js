@@ -1084,46 +1084,104 @@ function renderPrologue(data) {
   const eyebrowEl = document.getElementById("prologue-eyebrow");
   eyebrowEl.textContent = p.eyebrow;
   eyebrowEl.classList.toggle("hidden", !p.eyebrow);
+
+  // ひとつずつ表示する側：文字はJS側でタイプライター表示するので、ここでは
+  // 元の文章をdata属性に持たせておくだけにする（中身は空のまま）
   document.getElementById("prologue-theme-label").textContent = p.themeLabel;
-  renderMultilineText(document.getElementById("prologue-theme-text"), p.theme);
+  document.getElementById("prologue-theme-text").dataset.fullText = p.theme;
   document.getElementById("prologue-purpose-label").textContent = p.purposeLabel;
-  renderMultilineText(document.getElementById("prologue-purpose-text"), p.purpose);
+  document.getElementById("prologue-purpose-text").dataset.fullText = p.purpose;
   document.getElementById("prologue-effect-label").textContent = p.effectLabel;
-  renderMultilineText(document.getElementById("prologue-effect-text"), p.effect);
+  document.getElementById("prologue-effect-text").dataset.fullText = p.effect;
+
+  // 最後にまとめて表示する側：最初から全文を入れておく
+  document.getElementById("prologue-summary-theme-label").textContent = p.themeLabel;
+  renderMultilineText(document.getElementById("prologue-summary-theme-text"), p.theme);
+  document.getElementById("prologue-summary-purpose-label").textContent = p.purposeLabel;
+  renderMultilineText(document.getElementById("prologue-summary-purpose-text"), p.purpose);
+  document.getElementById("prologue-summary-effect-label").textContent = p.effectLabel;
+  renderMultilineText(document.getElementById("prologue-summary-effect-text"), p.effect);
+
   document.getElementById("btn-start-prologue").textContent = p.buttonLabel;
 }
 
-// テーマ→目的→効果の順に、ひとつずつ画面に浮かび上がっては消える演出。
-// 最後まで読み終えたら、「旅を始める」ボタンだけが画面の中央に現れる。
-let prologueTimers = [];
-function runPrologueSequence() {
-  prologueTimers.forEach((t) => clearTimeout(t));
-  prologueTimers = [];
+// 1文字ずつ流し込むタイプライター表示。改行(\n)は<br>として扱う。
+// isCurrent() が false を返した時点（別の演出に切り替わった等）で即座に打ち切る。
+function typewriterInto(el, text, msPerChar, isCurrent) {
+  return new Promise((resolve) => {
+    el.textContent = "";
+    const lines = text.split("\n");
+    let li = 0;
+    let ci = 0;
+    function step() {
+      if (!isCurrent()) return resolve();
+      if (li >= lines.length) return resolve();
+      const line = lines[li];
+      if (ci < line.length) {
+        el.appendChild(document.createTextNode(line[ci]));
+        ci++;
+        setTimeout(step, msPerChar);
+      } else {
+        li++;
+        ci = 0;
+        if (li < lines.length) el.appendChild(document.createElement("br"));
+        setTimeout(step, msPerChar);
+      }
+    }
+    step();
+  });
+}
+
+// テーマ→目的→効果の順に、ひとつずつタイプライターで浮かび上がっては消える演出。
+// 最後まで読み終えたら、全文をまとめて表示し、旅を始めるボタンを添える
+// （アニメーションの速さについていけない人も、ここで落ち着いて読める）。
+let prologueRunId = 0;
+async function runPrologueSequence() {
+  const myRunId = ++prologueRunId;
+  const isCurrent = () => prologueRunId === myRunId;
 
   const prologueEl = openingEls.prologue;
   const blocks = Array.from(document.querySelectorAll("#opening-prologue .prologue-block"));
   const startBtn = document.getElementById("btn-start-prologue");
+  const summaryEl = document.getElementById("prologue-summary");
 
-  prologueEl.classList.remove("is-cta");
-  blocks.forEach((b) => b.classList.remove("is-visible"));
+  prologueEl.classList.remove("is-summary");
+  summaryEl.classList.add("hidden");
+  blocks.forEach((b) => { b.classList.remove("is-visible"); b.classList.remove("is-typing"); });
   startBtn.classList.remove("is-visible");
 
-  const READ_TIME = 3200;
-  let delay = 500;
-  blocks.forEach((block) => {
-    prologueTimers.push(setTimeout(() => {
-      blocks.forEach((b) => b.classList.remove("is-visible"));
-      block.classList.add("is-visible");
-    }, delay));
-    delay += READ_TIME;
-  });
-  prologueTimers.push(setTimeout(() => {
-    blocks.forEach((b) => b.classList.remove("is-visible"));
-  }, delay));
-  prologueTimers.push(setTimeout(() => {
-    prologueEl.classList.add("is-cta");
-    startBtn.classList.add("is-visible");
-  }, delay + 900));
+  const MS_PER_CHAR = 85;
+  const PRE_TYPE_DELAY = 700;
+  const PAUSE_AFTER_TYPE = 2600;
+
+  await sleep(600);
+  if (!isCurrent()) return;
+
+  for (const block of blocks) {
+    if (!isCurrent()) return;
+    blocks.forEach((b) => { b.classList.remove("is-visible"); b.classList.remove("is-typing"); });
+    block.classList.add("is-visible");
+    const textEl = block.querySelector(".prologue-text");
+
+    await sleep(PRE_TYPE_DELAY);
+    if (!isCurrent()) return;
+
+    block.classList.add("is-typing");
+    await typewriterInto(textEl, textEl.dataset.fullText || "", MS_PER_CHAR, isCurrent);
+    if (!isCurrent()) return;
+    block.classList.remove("is-typing");
+
+    await sleep(PAUSE_AFTER_TYPE);
+  }
+  if (!isCurrent()) return;
+
+  blocks.forEach((b) => b.classList.remove("is-visible"));
+  await sleep(700);
+  if (!isCurrent()) return;
+
+  prologueEl.classList.add("is-summary");
+  summaryEl.classList.remove("hidden");
+  startBtn.classList.add("is-visible");
 }
 
 function renderAllChapters(data) {
@@ -1762,8 +1820,7 @@ function setupNavigationEvents() {
 
 function resetOpeningVisuals() {
   stopFlyingSfx();
-  prologueTimers.forEach((t) => clearTimeout(t));
-  prologueTimers = [];
+  prologueRunId++; // 進行中のプロローグ演出(タイプライター等)があれば打ち切る
   openingEls.earthScene.classList.remove("is-fading");
   openingEls.japanGlow.classList.remove("is-lit");
   openingEls.baliGlow.classList.remove("is-lit");

@@ -406,9 +406,33 @@ ul { list-style: none; margin: 0; padding: 0; }
   font-family: var(--font-heading); font-size: clamp(1rem, 3.4vh, 1.42rem); line-height: 1.5; letter-spacing: .03em;
   color: var(--color-white);
 }
-/* 3つのメッセージを読み終えたら、旅を始めるボタンだけが画面の中央に浮かぶ状態にする */
-.opening-prologue.is-cta { justify-content: center; }
-.opening-prologue.is-cta .prologue-scroll { display: none; }
+/* タイプライター演出の途中でも、動く文字を目で追いやすいようにカーソルを添える */
+.prologue-block.is-typing .prologue-text::after {
+  content: ""; display: inline-block; width: .09em; height: 1em; margin-left: 2px;
+  background: var(--color-turquoise); vertical-align: -.1em;
+  animation: prologue-caret-blink 1s steps(1) infinite;
+}
+@keyframes prologue-caret-blink { 50% { opacity: 0; } }
+
+/* 3つ読み終えたら、一度に全文を読める「まとめ」表示に切り替える
+   （アニメーションのスピードについていけない人でも、ここで読めるようにする） */
+.opening-prologue.is-summary .prologue-block { display: none; }
+.prologue-summary {
+  width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: clamp(6px, 1.6vh, 14px);
+}
+.prologue-summary.hidden { display: none; }
+.prologue-summary-block { text-align: center; }
+.prologue-summary-label {
+  font-family: var(--font-heading); font-weight: 700; letter-spacing: .16em;
+  font-size: clamp(.68rem, 1.6vh, .85rem);
+  color: var(--color-turquoise); margin-bottom: clamp(2px, .6vh, 6px);
+}
+.prologue-summary-text {
+  font-family: var(--font-heading); line-height: 1.4; letter-spacing: .02em;
+  font-size: clamp(.74rem, 2vh, .95rem);
+  color: var(--color-white);
+}
 .opening-prologue .btn-primary {
   flex: none; margin-top: clamp(8px, 2vh, var(--space-m)); margin-bottom: 0;
   opacity: 0; transform: translateY(16px);
