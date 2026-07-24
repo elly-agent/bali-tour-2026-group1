@@ -258,7 +258,8 @@ function finishOpeningToTitle(openingData) {
   openingEls.captionWrap.classList.add("hidden");
   openingEls.titleProducer.textContent = state.data.meta.producer;
   openingEls.titleMain.textContent = openingData.titleMain;
-  openingEls.titleSub.textContent = openingData.titleSub;
+  openingEls.titleSub.textContent = openingData.titleSub || "";
+  openingEls.titleSub.classList.toggle("hidden", !openingData.titleSub);
   openingEls.titleSub2.textContent = openingData.titleSub2 || "";
   openingEls.title.classList.remove("hidden");
 }
