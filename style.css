@@ -578,7 +578,8 @@ ul { list-style: none; margin: 0; padding: 0; }
 .slide-scroll {
   position: absolute; inset: 0;
   overflow-y: auto; overflow-x: hidden;
-  scroll-behavior: smooth;
+  /* scroll-behavior:smoothがiPhoneのタッチスクロールと干渉している疑いが
+     あるため、指でのスクロールには一切影響しない、最も素朴な挙動に戻す */
   padding: var(--space-l) var(--space-m);
 }
 
