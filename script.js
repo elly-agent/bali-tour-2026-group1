@@ -1453,6 +1453,28 @@ function closeChapterMenu() {
    8. BGM・効果音・フルスクリーン・自動再生
    ============================================================ */
 
+// スマホ(特にiOS Safari)は、ユーザーの操作(タップ)の中で直接play()した<audio>要素だけを
+// 「これは鳴らしてよいもの」として覚えており、それ以外は後から鳴らそうとしてもブロックする。
+// 最初のタップの中で全ての<audio>要素を一瞬だけ(無音で)再生しておくことで、後から
+// (数秒後や自動再生で)鳴らそうとしても、ブロックされずに鳴るようになる。
+function unlockAudioElements() {
+  document.querySelectorAll("audio").forEach((el) => {
+    const originalVolume = el.volume;
+    el.volume = 0;
+    const finish = () => {
+      el.pause();
+      el.currentTime = 0;
+      el.volume = originalVolume;
+    };
+    const playPromise = el.play();
+    if (playPromise && playPromise.then) {
+      playPromise.then(finish).catch(() => { el.volume = originalVolume; });
+    } else {
+      finish();
+    }
+  });
+}
+
 // オープニングで飛行機が飛び立つ瞬間に鳴らす効果音
 // スマホ(特にiOS Safari)は「操作(タップ)から間を置いて呼び出したplay()」を
 // ブロックすることがある。オープニング演出は最初のクリックから数秒後に効果音を
@@ -1918,6 +1940,7 @@ async function init() {
     // 最初の一回だけ、演出前にタップしてもらう（このタップを合図にBGM・効果音を
     // 鳴らし始めることで、スマホでも演出と音のタイミングがずれないようにする）
     document.getElementById("btn-tap-gate").addEventListener("click", () => {
+      unlockAudioElements(); // このタップの中で全ての音声を一度「解錠」しておく
       openingEls.tapGate.classList.add("is-hidden");
       runOpeningSequence(data);
     }, { once: true });
