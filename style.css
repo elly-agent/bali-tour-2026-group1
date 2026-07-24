@@ -548,9 +548,12 @@ ul { list-style: none; margin: 0; padding: 0; }
      隠れてしまい、スクロールしても最後まで見えなくなる。 */
   margin-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
   height: calc(100vh - var(--header-h, 118px) - 77px - env(safe-area-inset-bottom, 0px));
-  /* スマホでアドレスバーの出し引きにより100vhが実際の表示領域より
-     大きくなり、下部ナビに文章が隠れてしまうのを防ぐ（対応ブラウザのみ） */
-  height: calc(100dvh - var(--header-h, 118px) - 77px - env(safe-area-inset-bottom, 0px));
+  /* dvh（アドレスバーの出し引きに合わせて値が変わる単位）は、スクロール中に
+     アドレスバーが自動で隠れると高さが伸び縮みしてしまい、そのたびに
+     スクロール位置がクランプされ直して急に上へ戻ってしまう不具合の原因に
+     なっていた。svh（アドレスバー表示時=一番小さい高さ）を使えば、
+     スクロール中に土台の高さ自体が変化しなくなる（対応ブラウザのみ） */
+  height: calc(100svh - var(--header-h, 118px) - 77px - env(safe-area-inset-bottom, 0px));
   overflow: hidden; position: relative;
 }
 /* 高さ100%指定だと、レイアウトの都合で高さが0になってしまう場合があるため、
@@ -1397,7 +1400,7 @@ ul { list-style: none; margin: 0; padding: 0; }
   .slides-viewport {
     margin-bottom: calc(66px + env(safe-area-inset-bottom, 0px));
     height: calc(100vh - var(--header-h, 104px) - 69px - env(safe-area-inset-bottom, 0px));
-    height: calc(100dvh - var(--header-h, 104px) - 69px - env(safe-area-inset-bottom, 0px));
+    height: calc(100svh - var(--header-h, 104px) - 69px - env(safe-area-inset-bottom, 0px));
   }
   .slide { padding: var(--space-m) var(--space-s); }
   .info-grid { grid-template-columns: repeat(2, 1fr); }
