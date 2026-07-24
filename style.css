@@ -559,9 +559,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 
 .slide {
   position: absolute; inset: 0;
-  overflow-y: auto; overflow-x: hidden;
-  scroll-behavior: smooth;
-  padding: var(--space-l) var(--space-m);
+  overflow: hidden;
   opacity: 0; visibility: hidden;
   transform: translateX(40px) scale(.98);
   transition: opacity var(--dur-slow) var(--ease-soft), transform var(--dur-slow) var(--ease-soft), visibility var(--dur-slow);
@@ -570,12 +568,19 @@ ul { list-style: none; margin: 0; padding: 0; }
     radial-gradient(circle at 10% 90%, rgba(201,162,75,.10), transparent 45%),
     var(--color-white);
 }
-/* transform:translateX(0) scale(1)（実質何もしない値）でも、WebKitは独自の
-   合成レイヤーに昇格させてしまうことがあり、それがscrollTopの変更を
-   画面に反映しない不具合の原因になっていた可能性がある。transform:noneなら
-   同じアニメーション(40px/.98→識別変換)をしつつ、レイヤー昇格を避けられる。 */
 .slide.is-active { opacity: 1; visibility: visible; transform: none; z-index: 2; }
 .slide.is-prev { transform: translateX(-40px) scale(.98); }
+
+/* スクロールを実際に担当する要素は、スライド切り替え演出のtransformを
+   一切持たせない別の内側の箱にする。「transformを持つ要素にscrollTopを
+   代入しても画面に反映されないことがある」というWebKitの描画バグを、
+   transform:noneへの変更だけでは解消しきれなかったための、より確実な対策。 */
+.slide-scroll {
+  position: absolute; inset: 0;
+  overflow-y: auto; overflow-x: hidden;
+  scroll-behavior: smooth;
+  padding: var(--space-l) var(--space-m);
+}
 
 /* 中身が画面より短い時は縦中央に、長い時は上から自然に流れて
    最後まで確実にスクロールできるようにする（flexでの中央寄せ＋overflow:autoの
