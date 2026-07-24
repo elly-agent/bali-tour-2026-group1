@@ -183,6 +183,7 @@ function cacheOpeningEls() {
   openingEls.titleProducer = document.getElementById("opening-title-producer");
   openingEls.titleMain = document.getElementById("opening-title-main");
   openingEls.titleSub = document.getElementById("opening-title-sub");
+  openingEls.titleSub2 = document.getElementById("opening-title-sub2");
   openingEls.clouds = document.querySelector(".opening-clouds");
   openingEls.dots = document.querySelectorAll(".flight-dot");
   openingEls.labels = document.querySelectorAll(".flight-label");
@@ -258,6 +259,7 @@ function finishOpeningToTitle(openingData) {
   openingEls.titleProducer.textContent = state.data.meta.producer;
   openingEls.titleMain.textContent = openingData.titleMain;
   openingEls.titleSub.textContent = openingData.titleSub;
+  openingEls.titleSub2.textContent = openingData.titleSub2 || "";
   openingEls.title.classList.remove("hidden");
 }
 

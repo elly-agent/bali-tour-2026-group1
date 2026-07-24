@@ -371,6 +371,11 @@ ul { list-style: none; margin: 0; padding: 0; }
   letter-spacing: .04em;
   opacity: 0; animation: fade-up-title 1.2s var(--ease-soft) forwards .3s;
 }
+.opening-title-sub2 {
+  margin-top: 6px; font-size: .92rem; color: var(--color-gold-soft);
+  letter-spacing: .04em;
+  opacity: 0; animation: fade-up-title 1.2s var(--ease-soft) forwards .45s;
+}
 @keyframes fade-up-title { to { opacity: 1; transform: translateY(0); } }
 
 .btn-primary, .btn-secondary {
