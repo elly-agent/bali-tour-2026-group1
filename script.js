@@ -1205,6 +1205,12 @@ function updateScrollHint(slideEl) {
   hint.classList.toggle("hidden", !canScroll);
 }
 
+// FAQのアコーディオンを開いた時や画像の読み込み完了時など、スクロール操作を
+// 介さずにチャプターの高さが変わる場合にも、ヒントの表示/非表示を追従させる
+const scrollHintResizeObserver = new ResizeObserver((entries) => {
+  entries.forEach((entry) => updateScrollHint(entry.target));
+});
+
 // 「今日の予定」ショートカット：旅程チャプターへ移動し、今日の日付のカードまでスクロールする
 function goToTodaySchedule() {
   const chapters = state.data.chapters;
@@ -1235,6 +1241,8 @@ function goToSlide(index, options) {
   activeSlide.scrollTop = 0;
   setupRevealObserver(activeSlide);
   updateScrollHint(activeSlide);
+  scrollHintResizeObserver.disconnect();
+  scrollHintResizeObserver.observe(activeSlide);
 
   // 最初に見える範囲の演出はすぐに再生する
   requestAnimationFrame(() => {
@@ -1712,16 +1720,14 @@ function setupNavigationEvents() {
   });
 
   // 「下にスクロール」ボタン：タップで現在のチャプターを1画面分下へスクロールする。
-  // .slideはスライド切り替え演出のためtransformを持っており、iOS Safariでは
-  // transform付きのoverflow:auto要素にscrollTopを代入しても画面に反映されない
-  // ことがある（既知の描画バグ）。offsetHeightを読むことで強制的に再描画させ、
-  // 確実に反映させる。
+  // 自分でscrollHeightから上限を計算すると、計測タイミングのズレ（画像読み込み中
+  // など）で実際より小さい値になり、本当の一番下に届かないことがあった。
+  // 上限のjs側計算はやめ、ブラウザ自身の（常に正確な）クランプに任せる。
   document.getElementById("scroll-hint").addEventListener("click", () => {
     const activeSlide = document.querySelector(".slide.is-active");
     if (!activeSlide) return;
-    const maxY = activeSlide.scrollHeight - activeSlide.clientHeight;
-    activeSlide.scrollTop = Math.min(activeSlide.scrollTop + activeSlide.clientHeight * 0.75, maxY);
-    void activeSlide.offsetHeight; // 強制リフローで再描画させる
+    activeSlide.scrollTop += activeSlide.clientHeight * 0.75;
+    void activeSlide.offsetHeight; // 強制リフローで再描画させる(iOS Safari対策)
   });
 
   // スクロールに合わせて、ヒントの表示/非表示をリアルタイムに切り替える

@@ -1128,7 +1128,10 @@ ul { list-style: none; margin: 0; padding: 0; }
 /* --- エンディング --- */
 .slide--ending {
   background: linear-gradient(180deg, #ffd9a0 0%, #ff9d6c 35%, #e9636b 65%, #3b3466 100%) !important;
-  color: var(--color-white); overflow: hidden;
+  color: var(--color-white);
+  /* overflow:hidden だと縦方向のスクロールまで無効になり、画面より長い
+     メッセージが最後まで見られなくなってしまうため、横方向だけ隠す */
+  overflow-x: hidden;
 }
 .ending-sun {
   position: absolute; left: 50%; top: 60%; transform: translate(-50%,-50%);
