@@ -171,6 +171,7 @@ function cacheOpeningEls() {
   openingEls.clouds = document.querySelector(".opening-clouds");
   openingEls.dots = document.querySelectorAll(".flight-dot");
   openingEls.labels = document.querySelectorAll(".flight-label");
+  openingEls.tapGate = document.getElementById("opening-tap-gate");
 }
 
 function showCaption(step) {
@@ -1474,43 +1475,53 @@ function playSfxWithUnlockRetry(sfx, volume) {
   }
 }
 
+// 効果音をフェードアウトさせながら止める関数を作る（要素ごとに専用のタイマーを持たせるため、
+// 呼び出すたびに新しい関数を作らず、下でsfx-plane用・sfx-flying用を1つずつ用意して使い回す）
+function makeSfxFader(elId) {
+  let fadeTimer = null;
+  function cancelFade() {
+    if (fadeTimer) { clearInterval(fadeTimer); fadeTimer = null; }
+  }
+  function fadeOut(fadeMs) {
+    const sfx = document.getElementById(elId);
+    cancelFade();
+    if (sfx.paused) return;
+    const startVolume = sfx.volume;
+    const stepMs = 50;
+    let elapsed = 0;
+    fadeTimer = setInterval(() => {
+      elapsed += stepMs;
+      const ratio = Math.max(0, 1 - elapsed / fadeMs);
+      sfx.volume = startVolume * ratio;
+      if (ratio <= 0) {
+        clearInterval(fadeTimer);
+        fadeTimer = null;
+        sfx.pause();
+        sfx.currentTime = 0;
+        sfx.volume = startVolume;
+      }
+    }, stepMs);
+  }
+  return { fadeOut, cancelFade };
+}
+const planeSfxFader = makeSfxFader("sfx-plane");
+const flyingSfxFader = makeSfxFader("sfx-flying");
+
 function playTakeoffSfx() {
+  planeSfxFader.cancelFade();
   playSfxWithUnlockRetry(document.getElementById("sfx-plane"), 0.7);
 }
 
 // 飛行機が画面を飛んでいる間、ずっと流れる「飛行音」
 function playFlyingSfx() {
-  const sfx = document.getElementById("sfx-flying");
-  if (flyingSfxFadeTimer) {
-    clearInterval(flyingSfxFadeTimer);
-    flyingSfxFadeTimer = null;
-  }
-  playSfxWithUnlockRetry(sfx, 0.6);
+  flyingSfxFader.cancelFade();
+  playSfxWithUnlockRetry(document.getElementById("sfx-flying"), 0.6);
 }
-let flyingSfxFadeTimer = null;
+
+// 離陸音・飛行音のどちらも、ふっと消えるようにフェードアウトさせて止める
 function stopFlyingSfx() {
-  const sfx = document.getElementById("sfx-flying");
-  if (flyingSfxFadeTimer) {
-    clearInterval(flyingSfxFadeTimer);
-    flyingSfxFadeTimer = null;
-  }
-  if (sfx.paused) return;
-  const startVolume = sfx.volume;
-  const fadeMs = 700;
-  const stepMs = 50;
-  let elapsed = 0;
-  flyingSfxFadeTimer = setInterval(() => {
-    elapsed += stepMs;
-    const ratio = Math.max(0, 1 - elapsed / fadeMs);
-    sfx.volume = startVolume * ratio;
-    if (ratio <= 0) {
-      clearInterval(flyingSfxFadeTimer);
-      flyingSfxFadeTimer = null;
-      sfx.pause();
-      sfx.currentTime = 0;
-      sfx.volume = startVolume;
-    }
-  }, stepMs);
+  planeSfxFader.fadeOut(700);
+  flyingSfxFader.fadeOut(700);
 }
 
 const BGM_TRACK_STORAGE_KEY = "baliTour2026_bgmTrack";
@@ -1891,7 +1902,12 @@ async function init() {
     setTimeout(maybeShowBgmHint, 1200);
     setTimeout(updateHeaderHeightVars, 400);
   } else {
-    runOpeningSequence(data);
+    // 最初の一回だけ、演出前にタップしてもらう（このタップを合図にBGM・効果音を
+    // 鳴らし始めることで、スマホでも演出と音のタイミングがずれないようにする）
+    document.getElementById("btn-tap-gate").addEventListener("click", () => {
+      openingEls.tapGate.classList.add("is-hidden");
+      runOpeningSequence(data);
+    }, { once: true });
   }
 
   window.addEventListener("resize", updateHeaderHeightVars);

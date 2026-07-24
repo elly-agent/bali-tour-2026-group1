@@ -69,6 +69,13 @@
     <div class="cloud cloud--c"></div>
   </div>
 
+  <!-- 最初の一回だけのタップ画面：スマホのブラウザは操作(タップ)なしでは音を鳴らせないため、
+       ここでのタップを合図にBGM・効果音を鳴らし始めることで、演出と音のタイミングを合わせる -->
+  <div class="opening-tap-gate" id="opening-tap-gate">
+    <p class="opening-tap-gate-title">BALI TOUR 2026</p>
+    <button class="btn-primary" id="btn-tap-gate">タップして旅を始める</button>
+  </div>
+
   <!-- 「Selamat Datang！」到着メッセージの場面で流れる流れ星の演出 -->
   <div class="shooting-stars" id="shooting-stars" aria-hidden="true">
     <div class="shooting-star-track t1"><span class="shooting-star"></span></div>

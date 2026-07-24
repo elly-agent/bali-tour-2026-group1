@@ -155,6 +155,23 @@ ul { list-style: none; margin: 0; padding: 0; }
 
 /* 雲（オープニング後半・本編パララックスで共用） */
 .opening-clouds { position: absolute; inset: 0; overflow: hidden; opacity: 0; transition: opacity 1s ease; }
+
+/* 最初の一回だけのタップ画面。スマホは操作なしで音を鳴らせないため、ここでのタップを
+   合図にBGM・効果音を鳴らし始める（演出と音のタイミングを合わせるための画面）。 */
+.opening-tap-gate {
+  position: absolute; inset: 0; z-index: 20;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: var(--space-l);
+  background: rgba(6,19,28,.35);
+  opacity: 1; transition: opacity .6s var(--ease-soft), visibility .6s;
+}
+.opening-tap-gate.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.opening-tap-gate-title {
+  font-family: var(--font-heading); font-size: clamp(1.6rem, 6vw, 2.6rem);
+  letter-spacing: .14em; color: var(--color-white);
+  text-shadow: 0 0 40px rgba(42,183,201,.5);
+}
+.opening-tap-gate .btn-primary { animation: opa-glow 2.4s ease-in-out infinite; }
 .opening-clouds.is-visible { opacity: .5; }
 .cloud {
   position: absolute; background: rgba(255,255,255,.7); border-radius: 50%;
