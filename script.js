@@ -101,6 +101,7 @@ const state = {
   bgmTrackId: null,
   openingSkipped: false,
   observedSlides: new WeakSet(),
+  appEntered: false,
 };
 
 async function loadTourData() {
@@ -310,6 +311,7 @@ function enterMainApp() {
   const app = document.getElementById("app");
   openingScreen.classList.add("is-hidden");
   app.classList.remove("app-hidden");
+  state.appEntered = true;
   updateHeaderHeightVars();
   goToSlide(0, { instant: true });
   setTimeout(maybeShowBgmHint, 1200);
@@ -326,6 +328,11 @@ function initStarfield() {
   let stars = [];
 
   function resize() {
+    // 本編に入った後は星空は二度と見えないので、リサイズのたびに
+    // canvas.width を書き換えて強制レイアウト+星の再生成をするのは無駄な上、
+    // iOSでスクロール中にアドレスバーが動いてresizeが連発した際、
+    // チャプター内スクロールが先頭に巻き戻る一因になっていた。
+    if (state.appEntered) return;
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     const count = Math.floor((canvas.width * canvas.height) / 3500);
@@ -1784,8 +1791,26 @@ function updateHeaderHeightVars() {
   const shortcutBar = document.querySelector(".shortcut-bar");
   const topbarH = topbar ? topbar.offsetHeight : 0;
   const shortcutBarH = shortcutBar ? shortcutBar.offsetHeight : 0;
-  document.documentElement.style.setProperty("--topbar-h", topbarH + "px");
-  document.documentElement.style.setProperty("--header-h", (topbarH + shortcutBarH) + "px");
+  const topbarPx = topbarH + "px";
+  const headerPx = (topbarH + shortcutBarH) + "px";
+  const root = document.documentElement;
+  // 値が変わっていない場合は setProperty 自体を呼ばない。
+  // iOSのアドレスバーの表示/非表示に伴って resize イベントが連続発火するが、
+  // そのたびに :root のカスタムプロパティを書き換えるとスタイル再計算が起き、
+  // スクロール中のチャプター内スクロール位置が先頭に巻き戻る不具合の原因になっていた。
+  if (root.style.getPropertyValue("--topbar-h") === topbarPx && root.style.getPropertyValue("--header-h") === headerPx) {
+    return;
+  }
+  root.style.setProperty("--topbar-h", topbarPx);
+  root.style.setProperty("--header-h", headerPx);
+}
+
+let headerResizeDebounceId = null;
+function scheduleHeaderHeightUpdate() {
+  // resize を即時処理せず少し待つことで、アドレスバーの表示/非表示アニメーション中に
+  // 何度も強制レイアウトが走るのを防ぐ(iOS Safariのスクロール巻き戻り対策)。
+  if (headerResizeDebounceId) clearTimeout(headerResizeDebounceId);
+  headerResizeDebounceId = setTimeout(updateHeaderHeightVars, 200);
 }
 
 async function init() {
@@ -1815,6 +1840,7 @@ async function init() {
   if (resumeIndex !== null) {
     document.getElementById("opening-screen").classList.add("is-hidden");
     document.getElementById("app").classList.remove("app-hidden");
+    state.appEntered = true;
     updateHeaderHeightVars();
     goToSlide(resumeIndex, { instant: true });
     startBgmAutoplay();
@@ -1833,7 +1859,7 @@ async function init() {
     }, { once: true });
   }
 
-  window.addEventListener("resize", updateHeaderHeightVars);
+  window.addEventListener("resize", scheduleHeaderHeightUpdate);
 }
 
 document.addEventListener("DOMContentLoaded", init);
