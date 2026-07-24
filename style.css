@@ -404,7 +404,10 @@ ul { list-style: none; margin: 0; padding: 0; }
 /* ------------------------------------------------------------
    4. 本編アプリの共通レイアウト
    ------------------------------------------------------------ */
-.app { min-height: 100vh; display: flex; flex-direction: column; }
+/* body側ですでに height:100% (拡大縮小しない安定した高さ) を確保しているため、
+   ここは 100vh のような「アドレスバーの開閉で伸び縮みする」単位を使わず、
+   親(body)の安定した高さをそのまま引き継ぐ。 */
+.app { height: 100%; display: flex; flex-direction: column; }
 .app-hidden { display: none; }
 
 .topbar {
@@ -543,7 +546,11 @@ ul { list-style: none; margin: 0; padding: 0; }
 }
 
 .slides-viewport {
-  flex: 1; margin-top: calc(var(--header-h, 118px) + 3px);
+  /* flex:1 (= flex-basis:0%) だと、下の height:calc(...) 指定は
+     ブラウザに完全に無視され、実際の高さは常に「flexで埋められる分」だけで
+     決まってしまう(これまでdvh→svhに変更しても何も変わらなかった原因)。
+     flex-basis:auto にして、下のheight指定を実際にそのまま使わせる。 */
+  flex: 1 1 auto; margin-top: calc(var(--header-h, 118px) + 3px);
   /* 下部固定ナビの高さ(ホームインジケーター分の余白込み)だけ、常に空けておく。
      これが足りないと、ノッチ付きiPhoneなどでチャプターの一番下がナビの下に
      隠れてしまい、スクロールしても最後まで見えなくなる。 */
