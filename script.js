@@ -1712,14 +1712,16 @@ function setupNavigationEvents() {
   });
 
   // 「下にスクロール」ボタン：タップで現在のチャプターを1画面分下へスクロールする。
-  // scrollBy()/scrollTo()のオプション指定はスマホのブラウザで反応しないことが
-  // あるため使わず、最も基本的なscrollTopへの直接代入だけで確実に動かす
-  // （アニメーションはCSSのscroll-behavior:smoothに任せる）。
+  // .slideはスライド切り替え演出のためtransformを持っており、iOS Safariでは
+  // transform付きのoverflow:auto要素にscrollTopを代入しても画面に反映されない
+  // ことがある（既知の描画バグ）。offsetHeightを読むことで強制的に再描画させ、
+  // 確実に反映させる。
   document.getElementById("scroll-hint").addEventListener("click", () => {
     const activeSlide = document.querySelector(".slide.is-active");
     if (!activeSlide) return;
     const maxY = activeSlide.scrollHeight - activeSlide.clientHeight;
     activeSlide.scrollTop = Math.min(activeSlide.scrollTop + activeSlide.clientHeight * 0.75, maxY);
+    void activeSlide.offsetHeight; // 強制リフローで再描画させる
   });
 
   // スクロールに合わせて、ヒントの表示/非表示をリアルタイムに切り替える
