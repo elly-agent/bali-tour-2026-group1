@@ -1198,24 +1198,6 @@ function updateTopbar(index) {
   });
 }
 
-// スクロールできる中身がある間は、スクロール位置にかかわらず常にヒントを表示する
-// （引数は実際にスクロールする.slide-scroll要素）
-function updateScrollHint(scrollEl) {
-  const hint = document.getElementById("scroll-hint");
-  const canScroll = scrollEl.scrollHeight - scrollEl.clientHeight > 24;
-  hint.classList.toggle("hidden", !canScroll);
-}
-
-// FAQのアコーディオンを開いた時や画像の読み込み完了時など、スクロール操作を
-// 介さずにチャプターの高さが変わる場合にも、ヒントの表示/非表示を追従させる
-// （観察対象は中身の高さが実際に伸び縮みする.slide-inner）
-const scrollHintResizeObserver = new ResizeObserver((entries) => {
-  entries.forEach((entry) => {
-    const scrollEl = entry.target.closest(".slide-scroll");
-    if (scrollEl) updateScrollHint(scrollEl);
-  });
-});
-
 // 「今日の予定」ショートカット：旅程チャプターへ移動し、今日の日付のカードまでスクロールする
 function goToTodaySchedule() {
   const chapters = state.data.chapters;
@@ -1246,9 +1228,6 @@ function goToSlide(index, options) {
   const activeScrollEl = activeSlide.querySelector(".slide-scroll");
   activeScrollEl.scrollTop = 0;
   setupRevealObserver(activeSlide);
-  updateScrollHint(activeScrollEl);
-  scrollHintResizeObserver.disconnect();
-  scrollHintResizeObserver.observe(activeSlide.querySelector(".slide-inner"));
 
   // 最初に見える範囲の演出はすぐに再生する
   requestAnimationFrame(() => {
@@ -1257,9 +1236,6 @@ function goToSlide(index, options) {
       if (rect.top < window.innerHeight) target.classList.add("is-in");
     });
   });
-
-  // 画像読み込み等で高さが変わった後にも、ヒント表示を再判定する
-  setTimeout(() => updateScrollHint(activeSlide), 400);
 
   // チャプター特有の演出フック
   if (activeSlide.dataset.type === "bargain") playBargainReveal();
@@ -1725,26 +1701,6 @@ function setupNavigationEvents() {
     if (event.target.id === "checklist-complete-popup") closeChecklistCompletePopup();
   });
 
-  // 「下にスクロール」ボタン：タップで、現在のチャプターの本当の一番下まで
-  // 一気に移動する。scrollHeight（十分大きい値）を代入し、ブラウザ自身に
-  // 「行けるところまで」正確にクランプさせる、最もシンプルで確実な方式。
-  document.getElementById("scroll-hint").addEventListener("click", () => {
-    const activeSlide = document.querySelector(".slide.is-active");
-    const scrollEl = activeSlide && activeSlide.querySelector(".slide-scroll");
-    if (!scrollEl) return;
-    scrollEl.scrollTop = scrollEl.scrollHeight;
-  });
-
-  // スクロールに合わせて、ヒントの表示/非表示をリアルタイムに切り替える
-  document.getElementById("slides-track").addEventListener(
-    "scroll",
-    (event) => {
-      if (event.target.classList && event.target.classList.contains("slide-scroll")) {
-        updateScrollHint(event.target);
-      }
-    },
-    true
-  );
 
   document.getElementById("btn-close-lightbox").addEventListener("click", closeLightbox);
   document.getElementById("btn-lightbox-prev").addEventListener("click", () => openLightbox(lightboxIndex - 1));
