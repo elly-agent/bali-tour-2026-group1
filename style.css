@@ -50,6 +50,7 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  overscroll-behavior: none;
   background: var(--color-sand);
   color: var(--color-ink);
   font-family: var(--font-body);
@@ -583,6 +584,12 @@ ul { list-style: none; margin: 0; padding: 0; }
   overflow-y: auto; overflow-x: hidden;
   /* scroll-behavior:smoothがiPhoneのタッチスクロールと干渉している疑いが
      あるため、指でのスクロールには一切影響しない、最も素朴な挙動に戻す */
+  /* 一番下(または上)まで指でスクロールした時、iOSでは overflow:hidden の
+     bodyであってもタッチのスクロールが外側のページへ「連鎖」してしまい、
+     ゴムのように弾んで戻る(ラバーバンド)ことがある。それがスクロール位置の
+     巻き戻りに見えていた可能性が高いため、この要素の外へスクロールを
+     一切逃さないようにする。 */
+  overscroll-behavior: contain;
   padding: var(--space-l) var(--space-m);
 }
 

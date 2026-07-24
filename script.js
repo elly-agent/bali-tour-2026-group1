@@ -1864,6 +1864,27 @@ async function init() {
 
 document.addEventListener("DOMContentLoaded", init);
 
+// iOSでは html/body に overflow:hidden を指定していても、指でのスクロールが
+// 中の要素の端(一番上・一番下)まで届いた瞬間、外側のページ全体へスクロールが
+// 「連鎖」してラバーバンド(ゴムのように弾む)動きをしてしまうことがある。
+// これがスクロール位置の巻き戻りに見えていた可能性が高いため、
+// タッチしている場所がスクロール可能な要素の中でない場合は
+// ページそのものが動かないようにする(CSSのoverscroll-behaviorだけでは
+// 効かない古いWebKitのための保険)。
+function isInsideScrollableElement(target) {
+  let el = target;
+  while (el && el !== document.body && el.nodeType === 1) {
+    const style = window.getComputedStyle(el);
+    const canScrollY = (style.overflowY === "auto" || style.overflowY === "scroll");
+    if (canScrollY && el.scrollHeight > el.clientHeight) return true;
+    el = el.parentElement;
+  }
+  return false;
+}
+document.addEventListener("touchmove", (event) => {
+  if (!isInsideScrollableElement(event.target)) event.preventDefault();
+}, { passive: false });
+
 // スマホ(特にiOS Safari)の「戻る」操作等で、ページがゼロから読み込み直されず、
 // 以前の画面状態のスナップショットがそのまま復元される(bfcache)ことがある。
 // これだとオープニング演出の途中の状態が壊れて見えることがあるため、
