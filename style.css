@@ -570,7 +570,11 @@ ul { list-style: none; margin: 0; padding: 0; }
     radial-gradient(circle at 10% 90%, rgba(201,162,75,.10), transparent 45%),
     var(--color-white);
 }
-.slide.is-active { opacity: 1; visibility: visible; transform: translateX(0) scale(1); z-index: 2; }
+/* transform:translateX(0) scale(1)（実質何もしない値）でも、WebKitは独自の
+   合成レイヤーに昇格させてしまうことがあり、それがscrollTopの変更を
+   画面に反映しない不具合の原因になっていた可能性がある。transform:noneなら
+   同じアニメーション(40px/.98→識別変換)をしつつ、レイヤー昇格を避けられる。 */
+.slide.is-active { opacity: 1; visibility: visible; transform: none; z-index: 2; }
 .slide.is-prev { transform: translateX(-40px) scale(.98); }
 
 /* 中身が画面より短い時は縦中央に、長い時は上から自然に流れて
