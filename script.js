@@ -591,9 +591,9 @@ function renderCurrency(data) {
   const input = document.getElementById("currency-calc-input");
   const output = document.getElementById("currency-calc-output");
   input.addEventListener("input", () => {
-    const yen = Number(input.value) || 0;
-    const idr = Math.round(yen * currency.rateJpyToIdr);
-    output.textContent = idr.toLocaleString("ja-JP") + " ルピア";
+    const idr = Number(input.value) || 0;
+    const yen = Math.round(idr / currency.rateJpyToIdr);
+    output.textContent = yen.toLocaleString("ja-JP") + " 円";
   });
 
   const priceGrid = document.getElementById("price-list-grid");

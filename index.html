@@ -467,6 +467,15 @@
           <h2 class="chapter-title reveal" data-bind="chapterTitle:currency"></h2>
           <p class="chapter-lead reveal" data-bind="currency.description"></p>
 
+          <div class="currency-calc currency-calc--primary reveal">
+            <label for="currency-calc-input">ルピア → 円 早見計算</label>
+            <div class="currency-calc-row">
+              <input type="number" id="currency-calc-input" placeholder="例：100000" min="0">
+              <span>ルピア ＝</span>
+              <span id="currency-calc-output" class="currency-calc-output">0 円</span>
+            </div>
+          </div>
+
           <div class="story-image reveal">
             <img data-src="assets/images/currency-rupiah.jpg" alt="インドネシア・ルピア紙幣" class="ph-img">
           </div>
@@ -478,15 +487,6 @@
             <thead><tr><th>日本円</th><th>ルピア（目安）</th></tr></thead>
             <tbody id="currency-table-body"></tbody>
           </table>
-
-          <div class="currency-calc reveal">
-            <label for="currency-calc-input">円 → ルピア 早見計算</label>
-            <div class="currency-calc-row">
-              <input type="number" id="currency-calc-input" placeholder="例：1000" min="0">
-              <span>円 ＝</span>
-              <span id="currency-calc-output" class="currency-calc-output">0 ルピア</span>
-            </div>
-          </div>
 
           <div class="price-list reveal">
             <p class="price-list-title">物価の目安</p>

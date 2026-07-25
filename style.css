@@ -867,6 +867,15 @@ ul { list-style: none; margin: 0; padding: 0; }
 }
 .currency-calc-output { font-weight: 700; color: var(--color-emerald); font-size: 1.1rem; }
 
+/* 現地でよく使う「ルピア→円」計算機。チャプター冒頭に置くため、目立つ配色にする */
+.currency-calc--primary {
+  background: linear-gradient(135deg, var(--color-turquoise), var(--color-emerald));
+  margin-bottom: var(--space-m);
+}
+.currency-calc--primary label { color: rgba(255,255,255,.9); }
+.currency-calc--primary .currency-calc-row span:not(.currency-calc-output) { color: var(--color-white); }
+.currency-calc--primary .currency-calc-output { color: var(--color-white); }
+
 /* --- 物価の目安 --- */
 .price-list { margin-top: var(--space-m); }
 .price-list-title {
