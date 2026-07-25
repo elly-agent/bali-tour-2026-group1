@@ -930,6 +930,13 @@ ul { list-style: none; margin: 0; padding: 0; }
 .item-note { font-size: .78rem; color: var(--color-ink-soft); }
 .checklist li.is-checked .item-label { text-decoration: line-through; color: var(--color-ink-soft); opacity: .6; }
 .checklist li.is-checked .item-note { opacity: .4; }
+
+/* 絶対に忘れてはいけない持ち物を、赤字太字で目立たせる */
+.checklist li.is-urgent { background: rgba(214,49,49,.08); border: 1.5px solid rgba(214,49,49,.35); }
+.checklist li.is-urgent .item-label { color: #d63131; font-weight: 700; }
+.checklist li.is-urgent .item-note { color: #d63131; }
+.checklist li.is-urgent.is-checked .item-label,
+.checklist li.is-urgent.is-checked .item-note { color: var(--color-ink-soft); font-weight: 400; }
 .packing-tip {
   background: linear-gradient(120deg, rgba(201,162,75,.15), rgba(42,183,201,.12));
   border-left: 4px solid var(--color-gold);

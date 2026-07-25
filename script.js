@@ -698,6 +698,7 @@ function renderPacking(data) {
     group.items.forEach((item) => {
       const li = el("li");
       if (saved[item.id]) li.classList.add("is-checked");
+      if (item.highlight) li.classList.add("is-urgent");
 
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";

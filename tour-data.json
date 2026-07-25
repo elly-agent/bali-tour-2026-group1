@@ -180,6 +180,7 @@
     {
       "category": "MUST-HAVES｜必ず必要なもの",
       "items": [
+        { "id": "passport-copy", "label": "パスポートのコピー3枚", "note": "紛失・盗難時に備えて必ず用意してください（原本とは別に保管）", "highlight": true },
         { "id": "passport", "label": "パスポート", "note": "残存期間が6ヶ月以上あるか確認" },
         { "id": "cash", "label": "現金", "note": "両替は現地で／アメックスカードは使えない／スキミングに注意／屋台ではカード使用しないこと" },
         { "id": "eticket", "label": "航空券（eチケット控え）" },
@@ -225,7 +226,8 @@
         { "id": "shampoo", "label": "シャンプー類", "note": "必要な方" },
         { "id": "neck-pillow", "label": "ネックピロー", "note": "飛行機で" },
         { "id": "snacks", "label": "お菓子" },
-        { "id": "compression-bag", "label": "圧縮袋", "note": "衣類をコンパクトに収納" }
+        { "id": "compression-bag", "label": "圧縮袋", "note": "衣類をコンパクトに収納" },
+        { "id": "overnight-bag", "label": "一泊分の荷物が入るリュックかバッグ", "note": "※離島に移動の際に使います" }
       ]
     },
     {
@@ -235,7 +237,9 @@
         { "id": "toiletries", "label": "洗面用具・スキンケア用品・メイク道具" },
         { "id": "plug-adapter", "label": "変換プラグ（Cタイプ）・延長コード", "note": "約2m" },
         { "id": "book", "label": "本・ガイドブック・筆記用具" },
-        { "id": "trash-bag", "label": "ビニール袋・ゴミ袋", "note": "濡れた物やゴミ用" }
+        { "id": "trash-bag", "label": "ビニール袋・ゴミ袋", "note": "濡れた物やゴミ用" },
+        { "id": "laundry-net", "label": "洗濯ネット", "note": "クリーニングに出す時に使います" },
+        { "id": "envelope", "label": "封筒", "note": "※両替したい現金を入れておいてください" }
       ]
     }
   ],
@@ -361,6 +365,7 @@
     { "image": "gallery-swing.jpg", "caption": "海を望むブランコにて" },
     { "image": "gallery-blue-water.jpg", "caption": "透き通るコバルトブルーの海" },
     { "image": "gallery-smoothie.jpg", "caption": "南国フルーツのスムージー" },
+    { "image": "gallery-welcome-drink.jpg", "caption": "ウェルカムドリンク" },
     { "image": "gallery-snorkeling.jpg", "caption": "シュノーケリングのひととき" },
     { "image": "gallery-villa-pool.jpg", "caption": "緑に囲まれたヴィラのプール" },
     { "image": "gallery-temple-group.jpg", "caption": "寺院にて、みんなで記念撮影" }
@@ -386,6 +391,11 @@
       "name": "ヨガバーン（The Yoga Barn）",
       "image": "day3-yoga.jpg",
       "desc": "ウブドを代表する人気ヨガスタジオ。緑に囲まれた開放的な空間で、心身をリセットする朝ヨガの時間を過ごせます。"
+    },
+    {
+      "name": "ケチャックダンス",
+      "image": "spot-kecak-dance.jpg",
+      "desc": "ユネスコ無形文化遺産にも登録されている、バリ島を代表する伝統舞踊。楽器を使わず、大勢の男性が「チャッ、チャッ」という掛け声を重ねるコーラスに合わせて、ラーマーヤナ物語を演じます。灯りに照らされた幻想的な雰囲気の中で鑑賞するひとときです。"
     },
     {
       "name": "ティルタウンプル寺院",
