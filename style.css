@@ -26,6 +26,7 @@
   /* --- フォント --- */
   --font-heading: 'Cormorant Garamond', 'Noto Serif JP', serif;
   --font-body:    'Noto Sans JP', 'Noto Serif JP', sans-serif;
+  --font-round:   'Zen Maru Gothic', 'Noto Sans JP', sans-serif;
 
   /* --- 余白・角丸 --- */
   --space-s: 12px;
@@ -1006,6 +1007,53 @@ ul { list-style: none; margin: 0; padding: 0; }
   transition: transform .5s var(--ease-soft), opacity .3s ease;
 }
 .trivia-card.is-flip { transform: rotateY(90deg); opacity: .4; }
+
+/* --- バリ物語（Ch17・水彩イラストで綴る成り立ち） --- */
+.bali-story-title {
+  margin-top: var(--space-xl);
+  text-align: center;
+  font-family: var(--font-round);
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: var(--color-turquoise-deep);
+  letter-spacing: .06em;
+}
+.bali-story {
+  margin-top: var(--space-m);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-l);
+}
+.bali-story-panel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-m);
+  background: var(--color-sand);
+  border-radius: var(--radius-l);
+  padding: var(--space-s);
+  box-shadow: 0 6px 20px rgba(34,52,58,.08);
+}
+.bali-story-panel:nth-child(even) { flex-direction: row-reverse; }
+.bali-story-img {
+  width: 42%; flex-shrink: 0;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  border-radius: var(--radius-m);
+  box-shadow: 0 4px 14px rgba(34,52,58,.15);
+}
+.bali-story-text {
+  font-family: var(--font-round);
+  font-weight: 500;
+  font-size: .96rem;
+  line-height: 1.9;
+  color: var(--color-ink);
+}
+@media (max-width: 600px) {
+  .bali-story-panel, .bali-story-panel:nth-child(even) {
+    flex-direction: column;
+  }
+  .bali-story-img { width: 100%; }
+}
 
 /* --- ルートMAP（Ch14） --- */
 .route-map-visual { position: relative; margin-bottom: var(--space-m); border-radius: var(--radius-m); overflow: hidden; }

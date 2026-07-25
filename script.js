@@ -851,6 +851,18 @@ function renderTrivia(data) {
   });
 }
 
+// 水彩イラストで綴る、バリ島の成り立ち物語
+function renderBaliStory(data) {
+  const wrap = document.getElementById("bali-story");
+  data.baliStory.forEach((panel) => {
+    const item = el("div", "bali-story-panel reveal");
+    item.appendChild(makeImg(panel.image, "バリ物語のイラスト", "bali-story-img"));
+    const textEl = el("p", "bali-story-text", panel.text);
+    item.appendChild(textEl);
+    wrap.appendChild(item);
+  });
+}
+
 // --- Chapter 14: 旅行ルートMAP ---
 // 実際のイラストマップ画像(1536x1024)上の、各都市の目印(circle)の座標
 // (index.html の .route-map-city の cx/cy と対応させている)
@@ -1127,6 +1139,7 @@ function renderAllChapters(data) {
   renderHotels(data);
   renderGourmet(data);
   renderTrivia(data);
+  renderBaliStory(data);
   renderRouteMap(data);
   renderGallery(data);
   renderSpots(data);
