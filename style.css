@@ -1016,6 +1016,7 @@ ul { list-style: none; margin: 0; padding: 0; }
   transition: transform .5s var(--ease-soft), opacity .3s ease;
 }
 .trivia-card.is-flip { transform: rotateY(90deg); opacity: .4; }
+.trivia-card-wrap .btn-secondary { margin-top: var(--space-s); }
 
 /* --- バリ物語（Ch17・水彩イラストで綴る成り立ち） --- */
 .bali-story-title {
