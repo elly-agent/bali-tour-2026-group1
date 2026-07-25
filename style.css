@@ -1036,8 +1036,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 .bali-story-panel:nth-child(even) { flex-direction: row-reverse; }
 .bali-story-img {
   width: 42%; flex-shrink: 0;
-  aspect-ratio: 4/3;
-  object-fit: cover;
+  height: auto;
   border-radius: var(--radius-m);
   box-shadow: 0 4px 14px rgba(34,52,58,.15);
 }
