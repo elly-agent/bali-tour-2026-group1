@@ -180,7 +180,7 @@
     {
       "category": "MUST-HAVES｜必ず必要なもの",
       "items": [
-        { "id": "passport-copy", "label": "パスポートのコピー3枚", "note": "紛失・盗難時に備えて必ず用意してください（原本とは別に保管）", "highlight": true },
+        { "id": "passport-copy", "label": "パスポートのコピー3枚", "note": "現地で提出に使うため必ず用意してください", "highlight": true },
         { "id": "passport", "label": "パスポート", "note": "残存期間が6ヶ月以上あるか確認" },
         { "id": "cash", "label": "現金", "note": "両替は現地で／アメックスカードは使えない／スキミングに注意／屋台ではカード使用しないこと" },
         { "id": "eticket", "label": "航空券（eチケット控え）" },
@@ -191,10 +191,10 @@
         { "id": "medicine", "label": "常備薬・処方箋" },
         { "id": "contacts", "label": "コンタクトの予備", "note": "使用する方のみ" },
         { "id": "sanitary", "label": "生理用品" },
-        { "id": "sanitizer", "label": "除菌グッズ", "note": "衛生用品が必要な方" },
         { "id": "sunscreen", "label": "日焼け止め" },
-        { "id": "insect-repellent", "label": "虫除けスプレー", "note": "必要な方" },
-        { "id": "motion-sickness", "label": "酔い止め", "note": "水無しタイプがおすすめ" }
+        { "id": "overnight-bag", "label": "一泊分の荷物が入るリュックかバッグ", "note": "※離島に移動の際に使います" },
+        { "id": "plug-adapter", "label": "変換プラグ（Cタイプ）・延長コード", "note": "約2m" },
+        { "id": "envelope", "label": "封筒", "note": "※両替したい現金を入れておいてください" }
       ]
     },
     {
@@ -223,11 +223,10 @@
         { "id": "ice-bag", "label": "水筒の氷を作る袋", "note": "100均で購入可" },
         { "id": "swelling-care", "label": "むくみ対策グッズ", "note": "必要な方" },
         { "id": "eco-bag", "label": "エコバッグ・ジッパー袋", "note": "濡れ物入れに" },
-        { "id": "shampoo", "label": "シャンプー類", "note": "必要な方" },
+        { "id": "shampoo", "label": "シャンプー類", "note": "海に行くことが多く、日本とは水質が違うため、普段使用しているものを持ってくるのがおすすめです" },
         { "id": "neck-pillow", "label": "ネックピロー", "note": "飛行機で" },
         { "id": "snacks", "label": "お菓子" },
-        { "id": "compression-bag", "label": "圧縮袋", "note": "衣類をコンパクトに収納" },
-        { "id": "overnight-bag", "label": "一泊分の荷物が入るリュックかバッグ", "note": "※離島に移動の際に使います" }
+        { "id": "compression-bag", "label": "圧縮袋", "note": "衣類をコンパクトに収納" }
       ]
     },
     {
@@ -235,11 +234,12 @@
       "items": [
         { "id": "towel", "label": "タオル・バスタオル", "note": "ホテルにもあり" },
         { "id": "toiletries", "label": "洗面用具・スキンケア用品・メイク道具" },
-        { "id": "plug-adapter", "label": "変換プラグ（Cタイプ）・延長コード", "note": "約2m" },
-        { "id": "book", "label": "本・ガイドブック・筆記用具" },
+        { "id": "book", "label": "筆記用具" },
         { "id": "trash-bag", "label": "ビニール袋・ゴミ袋", "note": "濡れた物やゴミ用" },
         { "id": "laundry-net", "label": "洗濯ネット", "note": "クリーニングに出す時に使います" },
-        { "id": "envelope", "label": "封筒", "note": "※両替したい現金を入れておいてください" }
+        { "id": "sanitizer", "label": "除菌グッズ", "note": "衛生用品が必要な方" },
+        { "id": "insect-repellent", "label": "虫除けスプレー", "note": "必要な方" },
+        { "id": "motion-sickness", "label": "酔い止め", "note": "水無しタイプがおすすめ" }
       ]
     }
   ],
