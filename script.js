@@ -1565,9 +1565,14 @@ function openBgmMenu(anchorId) {
   const anchor = document.getElementById(anchorId || "btn-bgm");
   const rect = anchor.getBoundingClientRect();
   menu.style.bottom = "auto";
-  menu.style.right = window.innerWidth - rect.right + "px";
-  menu.classList.remove("hidden"); // 高さを測るため、位置を決める前にいったん表示する
+  menu.classList.remove("hidden"); // サイズを測るため、位置を決める前にいったん表示する
+  const menuWidth = menu.offsetWidth;
   const menuHeight = menu.offsetHeight;
+  // 画面左側にあるボタン（例：BGM変更ショートカット）から開く場合、
+  // アンカーの右端基準のままだとメニューが画面左にはみ出すのでクランプする
+  let right = window.innerWidth - rect.right;
+  right = Math.max(8, Math.min(right, window.innerWidth - menuWidth - 8));
+  menu.style.right = right + "px";
   // 画面下半分にあるボタンから開く場合は、メニューが画面からはみ出さないよう上向きに開く
   let top = rect.top > window.innerHeight / 2
     ? rect.top - menuHeight - 10
