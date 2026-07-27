@@ -3,3 +3,12 @@ compatibility_date = "2026-07-23"
 
 [assets]
 directory = "."
+
+[[r2_buckets]]
+binding = "GOURMET_PHOTOS"
+bucket_name = "bali-tour-2026-photos"
+
+[[d1_databases]]
+binding = "GOURMET_DB"
+database_name = "bali-tour-2026-gourmet"
+database_id = "5b23f0e3-0431-4d39-966d-0c8617f9b887"
