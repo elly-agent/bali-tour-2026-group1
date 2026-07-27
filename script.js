@@ -662,6 +662,24 @@ function renderClothing(data) {
   });
 }
 
+function renderSeaPlayTips(data) {
+  const tips = data.seaPlayTips;
+  const imageWrap = document.getElementById("sea-play-tips-image");
+  imageWrap.appendChild(makeImg(tips.image, "海で遊ぶ様子"));
+
+  const list = document.getElementById("sea-tips-list");
+  tips.items.forEach((item) => {
+    const card = el("div", "sea-tip-item reveal");
+    card.innerHTML =
+      "<span class='sea-tip-item-title'>" + item.title + "</span>" +
+      "<span class='sea-tip-item-text'>" + item.text + "</span>";
+    list.appendChild(card);
+  });
+
+  const creditLink = document.getElementById("marine-sports-credit-link");
+  if (creditLink && tips.creditUrl) creditLink.href = tips.creditUrl;
+}
+
 // --- Chapter 9: 持ち物チェックリスト（ローカル保存対応） ---
 const CHECKLIST_STORAGE_KEY = "baliTour2026_checklist";
 
@@ -1134,6 +1152,7 @@ function renderAllChapters(data) {
   renderCurrency(data);
   renderBargain(data);
   renderClothing(data);
+  renderSeaPlayTips(data);
   renderPacking(data);
   renderItinerary(data);
   renderHotels(data);

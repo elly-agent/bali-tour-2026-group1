@@ -922,6 +922,18 @@ ul { list-style: none; margin: 0; padding: 0; }
 .clothing-card .c-scene { font-weight: 700; color: var(--color-turquoise-deep); display: block; margin-bottom: 6px; }
 .clothing-card .c-advice { font-size: .85rem; color: var(--color-ink-soft); }
 
+/* --- 海で遊ぶときの心構え（マリンスポーツを楽しむチャプター） --- */
+.sea-tips-title { margin-top: 0; margin-bottom: var(--space-s); }
+.sea-tips-list { display: flex; flex-direction: column; gap: var(--space-s); }
+.sea-tip-item {
+  background: var(--color-sand); border-radius: var(--radius-m); padding: var(--space-m);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.sea-tip-item-title { font-weight: 700; color: var(--color-turquoise-deep); }
+.sea-tip-item-text { font-size: .88rem; color: var(--color-ink-soft); line-height: 1.7; }
+.marine-sports-credit { font-size: .8rem; color: var(--color-ink-soft); margin-top: var(--space-m); }
+.marine-sports-credit a { color: var(--color-turquoise-deep); text-decoration: underline; }
+
 /* --- チェックリスト（Ch9） --- */
 .checklist-category {
   font-size: 1rem; color: var(--color-gold); letter-spacing: .04em;
