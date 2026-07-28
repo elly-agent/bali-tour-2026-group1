@@ -680,6 +680,886 @@ function renderSeaPlayTips(data) {
   if (creditLink && tips.creditUrl) creditLink.href = tips.creditUrl;
 }
 
+/* ============================================================
+   Chapter 22: バリ旅グラム（グルメ投稿タイムライン）
+   ------------------------------------------------------------
+   投稿・写真はCloudflare Workers上のAPI（/api/gourmet/...）を経由して
+   R2（写真）とD1（投稿データ）に保存される。ログイン機能はなく、
+   「誰の投稿か」は端末ごとに保存したdevice_idだけで緩く判定している
+   （身内・友人限定の旅行という前提で、簡易な仕組みにしている）。
+   ============================================================ */
+const GG_API_BASE = "/api/gourmet";
+const GG_DEVICE_ID_KEY = "baliTour2026_gg_deviceId";
+const GG_NAME_KEY = "baliTour2026_gg_name";
+const GG_COACH_PHOTO_KEY = "baliTour2026_gg_coachPhotoSeen";
+const GG_COACH_MENU_KEY = "baliTour2026_gg_coachMenuSeen";
+const GG_POLL_INTERVAL_MS = 45000;
+
+const ggState = {
+  moodMap: {},
+  tagMap: {},
+  selectedMood: null,
+  selectedTag: null,
+  posts: [],
+  editingPostId: null,
+  photoBaseCanvas: null,
+  photoPreviewCanvas: null,
+};
+
+function ggDeviceId() {
+  let id = localStorage.getItem(GG_DEVICE_ID_KEY);
+  if (!id) {
+    id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ("dev-" + Date.now() + "-" + Math.random().toString(16).slice(2));
+    localStorage.setItem(GG_DEVICE_ID_KEY, id);
+  }
+  return id;
+}
+
+function ggEscapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text == null ? "" : text;
+  return div.innerHTML;
+}
+
+function initGourmetGram(data) {
+  const gg = data.gourmetGram;
+  gg.moods.forEach((m) => { ggState.moodMap[m.id] = m; });
+  gg.tags.forEach((t) => { ggState.tagMap[t.id] = t; });
+
+  const nameInput = document.getElementById("gg-name-input");
+  const savedName = localStorage.getItem(GG_NAME_KEY);
+  if (savedName) nameInput.value = savedName;
+  nameInput.addEventListener("input", () => localStorage.setItem(GG_NAME_KEY, nameInput.value.trim()));
+
+  const moodRow = document.getElementById("gg-mood-row");
+  gg.moods.forEach((mood) => {
+    const btn = el("button", "gg-mood-chip");
+    btn.type = "button";
+    btn.dataset.moodId = mood.id;
+    btn.innerHTML = "<span class='gg-mood-chip-emoji'>" + mood.emoji + "</span><span class='gg-mood-chip-label'>" + mood.label + "</span>";
+    btn.addEventListener("click", () => ggSelectMood(mood.id));
+    moodRow.appendChild(btn);
+  });
+  ggSelectMood(gg.moods[0].id);
+
+  const tagRow = document.getElementById("gg-tag-row");
+  gg.tags.forEach((tag, i) => {
+    const btn = el("button", "gg-tag-chip");
+    btn.type = "button";
+    btn.dataset.tagId = tag.id;
+    btn.textContent = tag.emoji + " " + tag.label;
+    btn.addEventListener("click", () => ggSelectTag(tag.id));
+    tagRow.appendChild(btn);
+  });
+  const defaultTag = gg.tags.find((t) => t.id === "before") || gg.tags[0];
+  ggSelectTag(defaultTag.id);
+
+  if (localStorage.getItem(GG_COACH_PHOTO_KEY)) {
+    document.getElementById("gg-photo-coach-bubble").classList.add("hidden");
+    document.getElementById("gg-photo-coach-finger").classList.add("hidden");
+  }
+
+  document.getElementById("gg-photo-input").addEventListener("change", ggHandlePhotoSelected);
+  document.getElementById("gg-brightness-slider").addEventListener("input", ggUpdateBrightnessPreview);
+  document.getElementById("gg-brightness-slider").addEventListener("change", ggUpdateBrightnessPreview);
+  document.getElementById("gg-brightness-skip").addEventListener("click", ggConfirmBrightness);
+  document.getElementById("gg-brightness-apply").addEventListener("click", ggConfirmBrightness);
+  document.getElementById("gg-submit-btn").addEventListener("click", ggSubmitPost);
+  document.getElementById("gg-cancel-edit-btn").addEventListener("click", ggCancelEdit);
+  document.getElementById("gg-save-mine-btn").addEventListener("click", () => ggSavePdf("mine"));
+  document.getElementById("gg-save-all-btn").addEventListener("click", () => ggSavePdf("all"));
+
+  ggFetchTimeline();
+  setInterval(() => { if (!document.hidden) ggFetchTimeline(); }, GG_POLL_INTERVAL_MS);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) ggFetchTimeline(); });
+}
+
+function ggSelectMood(moodId) {
+  ggState.selectedMood = moodId;
+  document.querySelectorAll(".gg-mood-chip").forEach((btn) => {
+    btn.classList.toggle("is-active", btn.dataset.moodId === moodId);
+  });
+}
+
+function ggSelectTag(tagId) {
+  ggState.selectedTag = tagId;
+  document.querySelectorAll(".gg-tag-chip").forEach((btn) => {
+    btn.classList.toggle("is-active", btn.dataset.tagId === tagId);
+  });
+}
+
+// EXIFの向きを含めて正しい向きで読み込む（未対応ブラウザでもフォールバックして動作は続く）
+async function ggLoadOrientedBitmap(file) {
+  if (window.createImageBitmap) {
+    try {
+      return await createImageBitmap(file, { imageOrientation: "from-image" });
+    } catch (e) { /* 次のフォールバックへ */ }
+  }
+  return await new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+function ggDrawResizedCanvas(source, maxDim) {
+  const w = source.width || source.naturalWidth;
+  const h = source.height || source.naturalHeight;
+  const scale = Math.min(1, maxDim / Math.max(w, h));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(w * scale));
+  canvas.height = Math.max(1, Math.round(h * scale));
+  canvas.getContext("2d").drawImage(source, 0, 0, canvas.width, canvas.height);
+  return canvas;
+}
+
+// CSS の filter:brightness() は環境によって効かないことがあるため、
+// ピクセルデータを直接書き換えて、どの端末でも確実に明るさが変わるようにする
+function ggBrightnessCanvas(sourceCanvas, brightnessPercent) {
+  const canvas = document.createElement("canvas");
+  canvas.width = sourceCanvas.width;
+  canvas.height = sourceCanvas.height;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(sourceCanvas, 0, 0);
+
+  const factor = brightnessPercent / 100;
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const d = imageData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    d[i] = Math.min(255, d[i] * factor);
+    d[i + 1] = Math.min(255, d[i + 1] * factor);
+    d[i + 2] = Math.min(255, d[i + 2] * factor);
+  }
+  ctx.putImageData(imageData, 0, 0);
+  return canvas;
+}
+
+async function ggHandlePhotoSelected(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  localStorage.setItem(GG_COACH_PHOTO_KEY, "1");
+  document.getElementById("gg-photo-coach-bubble").classList.add("hidden");
+  document.getElementById("gg-photo-coach-finger").classList.add("hidden");
+
+  const source = await ggLoadOrientedBitmap(file);
+  ggState.photoBaseCanvas = ggDrawResizedCanvas(source, 1600);
+  ggState.photoPreviewCanvas = ggDrawResizedCanvas(source, 480);
+
+  const dropIcon = document.getElementById("gg-photo-drop-icon");
+  const dropText = document.getElementById("gg-photo-drop-text");
+  const dropZone = document.getElementById("gg-photo-drop");
+  const existingThumb = dropZone.querySelector(".gg-photo-drop-thumb");
+  if (existingThumb) existingThumb.remove();
+  const thumb = document.createElement("img");
+  thumb.className = "gg-photo-drop-thumb";
+  thumb.src = ggState.photoPreviewCanvas.toDataURL("image/jpeg", 0.7);
+  dropZone.insertBefore(thumb, dropIcon);
+  dropIcon.classList.add("hidden");
+  dropText.textContent = "写真を変える";
+
+  document.getElementById("gg-brightness-slider").value = 50;
+  document.getElementById("gg-brightness-popup").classList.remove("hidden");
+  ggUpdateBrightnessPreview();
+}
+
+// スライダーを動かすたびに、ポップアップ内の別プレビューではなく、
+// 上に表示されている写真のサムネイルそのものを直接明るく／暗くする
+function ggUpdateBrightnessPreview() {
+  if (!ggState.photoPreviewCanvas) return;
+  const slider = document.getElementById("gg-brightness-slider");
+  const brightnessPercent = 50 + Number(slider.value);
+  const adjusted = ggBrightnessCanvas(ggState.photoPreviewCanvas, brightnessPercent);
+  const thumb = document.querySelector("#gg-photo-drop .gg-photo-drop-thumb");
+  if (thumb) thumb.src = adjusted.toDataURL("image/jpeg", 0.75);
+}
+
+// どちらのボタンを押しても、今スライダーで見えている明るさをそのまま確定する
+// （スライダーに触れていなければ50%＝変化なしのままなので、結果的に元の写真になる）
+function ggConfirmBrightness() {
+  if (ggState.photoBaseCanvas) {
+    const slider = document.getElementById("gg-brightness-slider");
+    const brightnessPercent = 50 + Number(slider.value);
+    ggState.photoBaseCanvas = ggBrightnessCanvas(ggState.photoBaseCanvas, brightnessPercent);
+  }
+  document.getElementById("gg-brightness-popup").classList.add("hidden");
+}
+
+function ggShowComposerError(message) {
+  const errorEl = document.getElementById("gg-composer-error");
+  errorEl.textContent = message;
+  errorEl.classList.toggle("hidden", !message);
+}
+
+async function ggSubmitPost() {
+  const name = document.getElementById("gg-name-input").value.trim();
+  const location = document.getElementById("gg-location-input").value.trim();
+  const caption = document.getElementById("gg-caption-input").value.trim();
+  const submitBtn = document.getElementById("gg-submit-btn");
+
+  if (!ggState.editingPostId && !name) { ggShowComposerError("おなまえを入力してください。"); return; }
+  if (!ggState.editingPostId && !ggState.photoBaseCanvas) { ggShowComposerError("写真を選んでください。"); return; }
+
+  ggShowComposerError("");
+  submitBtn.disabled = true;
+  submitBtn.textContent = ggState.editingPostId ? "更新中…" : "投稿中…";
+
+  try {
+    if (ggState.editingPostId) {
+      const res = await fetch(GG_API_BASE + "/posts/" + ggState.editingPostId, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          device_id: ggDeviceId(),
+          mood: ggState.selectedMood,
+          meal_tag: ggState.selectedTag,
+          location: location,
+          caption: caption,
+        }),
+      });
+      if (!res.ok) throw new Error("update failed");
+    } else {
+      const blob = await new Promise((resolve) => ggState.photoBaseCanvas.toBlob(resolve, "image/jpeg", 0.82));
+      const form = new FormData();
+      form.append("device_id", ggDeviceId());
+      form.append("name", name);
+      form.append("mood", ggState.selectedMood);
+      form.append("meal_tag", ggState.selectedTag);
+      form.append("location", location);
+      form.append("caption", caption);
+      form.append("photo", blob, "photo.jpg");
+      const res = await fetch(GG_API_BASE + "/posts", { method: "POST", body: form });
+      if (!res.ok) throw new Error("post failed");
+    }
+    ggResetComposer();
+    await ggFetchTimeline();
+  } catch (e) {
+    ggShowComposerError("送信に失敗しました。電波の良い場所でもう一度お試しください。");
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = ggState.editingPostId ? "更新する" : "投稿する";
+  }
+}
+
+function ggResetComposer() {
+  ggState.editingPostId = null;
+  ggState.photoBaseCanvas = null;
+  ggState.photoPreviewCanvas = null;
+  document.getElementById("gg-location-input").value = "";
+  document.getElementById("gg-caption-input").value = "";
+  document.getElementById("gg-photo-input").value = "";
+  document.getElementById("gg-brightness-popup").classList.add("hidden");
+  const dropZone = document.getElementById("gg-photo-drop");
+  const thumb = dropZone.querySelector(".gg-photo-drop-thumb");
+  if (thumb) thumb.remove();
+  document.getElementById("gg-photo-drop-icon").classList.remove("hidden");
+  document.getElementById("gg-photo-drop-text").textContent = "撮影 または ライブラリから選ぶ";
+  document.getElementById("gg-submit-btn").textContent = "投稿する";
+  document.getElementById("gg-cancel-edit-btn").classList.add("hidden");
+  document.getElementById("gg-photo-name-group").classList.remove("hidden");
+  document.getElementById("gg-editing-label").classList.add("hidden");
+  ggShowComposerError("");
+}
+
+function ggCancelEdit() {
+  ggResetComposer();
+}
+
+// 編集は写真・名前を変更できない仕組みなので、その2つは隠して「今から食べる！」以下だけを
+// 編集画面として見せる。写真選択の上までスクロールされて新規投稿に見えてしまう不具合の対策
+function ggStartEdit(post) {
+  ggState.editingPostId = post.id;
+  ggSelectMood(post.mood);
+  ggSelectTag(post.meal_tag);
+  document.getElementById("gg-location-input").value = post.location || "";
+  document.getElementById("gg-caption-input").value = post.caption || "";
+  document.getElementById("gg-submit-btn").textContent = "更新する";
+  document.getElementById("gg-cancel-edit-btn").classList.remove("hidden");
+  document.getElementById("gg-photo-name-group").classList.add("hidden");
+  const editingLabel = document.getElementById("gg-editing-label");
+  editingLabel.textContent = "✏️ " + post.name + "さんの投稿を編集中（写真・お名前は変更できません）";
+  editingLabel.classList.remove("hidden");
+  document.getElementById("gg-composer").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+async function ggDeletePost(postId) {
+  if (!window.confirm("この投稿を削除しますか？")) return;
+  try {
+    const res = await fetch(GG_API_BASE + "/posts/" + postId, {
+      method: "DELETE",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ device_id: ggDeviceId() }),
+    });
+    if (!res.ok) throw new Error("delete failed");
+    await ggFetchTimeline();
+  } catch (e) {
+    window.alert("削除に失敗しました。電波の良い場所でもう一度お試しください。");
+  }
+}
+
+function ggFormatTime(timestampMs) {
+  const d = new Date(timestampMs);
+  return (d.getMonth() + 1) + "/" + d.getDate() + " " +
+    String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+}
+
+async function ggFetchTimeline() {
+  try {
+    const res = await fetch(GG_API_BASE + "/posts");
+    if (!res.ok) return;
+    const data = await res.json();
+    ggState.posts = data.posts || [];
+    ggRenderTimeline();
+  } catch (e) {
+    // 通信できない時は、今表示されているタイムラインをそのまま残す
+  }
+}
+
+function ggRenderTimeline() {
+  const wrap = document.getElementById("gg-timeline");
+  const emptyMsg = document.getElementById("gg-timeline-empty");
+  wrap.innerHTML = "";
+  emptyMsg.classList.toggle("hidden", ggState.posts.length > 0);
+
+  const deviceId = ggDeviceId();
+  const showMenuCoach = !localStorage.getItem(GG_COACH_MENU_KEY);
+  let menuCoachPlaced = false;
+
+  ggState.posts.forEach((post) => {
+    const mood = ggState.moodMap[post.mood] || { emoji: "😋" };
+    const tag = ggState.tagMap[post.meal_tag] || { emoji: "", label: post.meal_tag };
+    const isOwn = post.device_id === deviceId;
+
+    const card = el("article", "gg-post-card");
+    const willShowCoach = isOwn && showMenuCoach && !menuCoachPlaced;
+
+    const head = el("div", "gg-post-head" + (willShowCoach ? " gg-coach-anchor" : ""));
+    head.innerHTML =
+      "<div class='gg-post-head-left'>" +
+        "<div class='gg-avatar'>" + mood.emoji + "</div>" +
+        "<div><div class='gg-post-name'></div><div class='gg-post-time'>" + ggFormatTime(post.created_at) + "</div></div>" +
+      "</div>";
+    head.querySelector(".gg-post-name").textContent = post.name;
+
+    if (isOwn) {
+      const menuBtn = el("button", "gg-post-menu-btn", "⋯");
+      menuBtn.type = "button";
+      head.appendChild(menuBtn);
+
+      if (willShowCoach) {
+        menuCoachPlaced = true;
+        const bubble = el("span", "gg-coach-bubble", "あとから直したい時はここ！");
+        bubble.style.top = "-30px"; bubble.style.right = "0";
+        const finger = el("span", "gg-coach-finger", "👆");
+        finger.style.top = "22px"; finger.style.right = "8px";
+        head.appendChild(bubble);
+        head.appendChild(finger);
+      }
+
+      const dropdown = el("div", "gg-post-menu-dropdown hidden");
+      const editBtn = el("button", "gg-menu-item", "✏️ 編集する");
+      editBtn.type = "button";
+      editBtn.addEventListener("click", () => { ggStartEdit(post); dropdown.classList.add("hidden"); });
+      const deleteBtn = el("button", "gg-menu-item danger", "🗑️ 削除する");
+      deleteBtn.type = "button";
+      deleteBtn.addEventListener("click", () => ggDeletePost(post.id));
+      dropdown.appendChild(editBtn);
+      dropdown.appendChild(deleteBtn);
+
+      menuBtn.addEventListener("click", () => {
+        localStorage.setItem(GG_COACH_MENU_KEY, "1");
+        const bubble = head.querySelector(".gg-coach-bubble");
+        const finger = head.querySelector(".gg-coach-finger");
+        if (bubble) bubble.remove();
+        if (finger) finger.remove();
+        dropdown.classList.toggle("hidden");
+      });
+
+      card.appendChild(head);
+      card.appendChild(dropdown);
+    } else {
+      card.appendChild(head);
+    }
+
+    const photo = document.createElement("img");
+    photo.className = "gg-post-photo";
+    photo.loading = "lazy";
+    photo.alt = post.caption || "投稿写真";
+    photo.src = post.photo_url;
+    card.appendChild(photo);
+
+    if (post.caption) {
+      const caption = el("p", "gg-post-caption");
+      caption.innerHTML = "<b>" + ggEscapeHtml(post.name) + "</b>";
+      caption.appendChild(document.createTextNode(post.caption));
+      card.appendChild(caption);
+    }
+
+    card.appendChild(el("span", "gg-post-tag", tag.emoji + " " + tag.label));
+    wrap.appendChild(card);
+  });
+}
+
+// 「常設ボタン」：どのページからでもバリ旅グラムのチャプターへ移動する
+function goToGourmetGram() {
+  const chapters = state.data.chapters;
+  const idx = chapters.findIndex((c) => c.id === "gourmet-gram");
+  if (idx === -1) return;
+  goToSlide(idx);
+}
+
+/* --- 旅の思い出をPDFで保存する（画像として一旦描画し、日本語もそのまま綺麗に出せるようにする） --- */
+function ggLoadScript(src) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = src;
+    script.onload = resolve;
+    script.onerror = () => reject(new Error("script load failed: " + src));
+    document.head.appendChild(script);
+  });
+}
+
+// html2canvas（ページ全体をクローンして描画するライブラリ）は、このサイトのように
+// 常時アニメーションする要素（星空・BGM等）を含む重いページでは応答が返らなくなることが
+// あったため使わず、jsPDFだけを読み込み、写真・文字はCanvas2D APIで直接描画する
+let ggPdfLibLoadPromise = null;
+function ggLoadPdfLib() {
+  if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve();
+  if (ggPdfLibLoadPromise) return ggPdfLibLoadPromise;
+  ggPdfLibLoadPromise = ggLoadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+  return ggPdfLibLoadPromise;
+}
+
+function ggLoadImageEl(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+function ggWrapCanvasText(ctx, text, maxWidth) {
+  const lines = [];
+  text.split("\n").forEach((paragraph) => {
+    let line = "";
+    for (const ch of paragraph) {
+      const test = line + ch;
+      if (line && ctx.measureText(test).width > maxWidth) {
+        lines.push(line);
+        line = ch;
+      } else {
+        line = test;
+      }
+    }
+    lines.push(line);
+  });
+  return lines;
+}
+
+const GG_PDF_PAGE_W = 1240;
+const GG_PDF_PAGE_H = 1754; // A4比率（150dpi相当）
+
+// A4を印刷してポスターにしても様になるよう、どのページにも共通の
+// 薄いゴールドの二重罫線フレーム＋隅の簡単な線画（ヤシの葉）を入れる
+function ggDrawPageFrame(ctx, color) {
+  const outer = 36;
+  const inner = 46;
+  ctx.save();
+  ctx.strokeStyle = color || "rgba(212,162,76,0.55)";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(outer, outer, GG_PDF_PAGE_W - outer * 2, GG_PDF_PAGE_H - outer * 2);
+  ctx.lineWidth = 1;
+  ctx.strokeRect(inner, inner, GG_PDF_PAGE_W - inner * 2, GG_PDF_PAGE_H - inner * 2);
+
+  ctx.lineWidth = 2;
+  ctx.lineCap = "round";
+  [
+    [70, GG_PDF_PAGE_H - 70, -1],
+    [GG_PDF_PAGE_W - 70, GG_PDF_PAGE_H - 70, 1],
+  ].forEach(([cx, cy, dir]) => {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx, cy - 46);
+    ctx.moveTo(cx, cy - 30);
+    ctx.quadraticCurveTo(cx + dir * 34, cy - 42, cx + dir * 50, cy - 18);
+    ctx.moveTo(cx, cy - 14);
+    ctx.quadraticCurveTo(cx + dir * 30, cy - 6, cx + dir * 44, cy + 12);
+    ctx.stroke();
+  });
+  ctx.restore();
+}
+
+// ヤシの木・太陽・波の線画（チャプター内の飾りと同じモチーフ）を、指定した
+// 中心座標(cx,cy)を基準に幅wで描く。表紙ページの余白を埋めるのに使う
+function ggDrawBaliMotif(ctx, cx, cy, w, color) {
+  const s = w / 200;
+  ctx.save();
+  ctx.translate(cx - w / 2, cy - 30 * s);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5 * s;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  ctx.beginPath();
+  ctx.moveTo(0, 52 * s);
+  ctx.bezierCurveTo(25 * s, 46 * s, 50 * s, 58 * s, 75 * s, 52 * s);
+  ctx.bezierCurveTo(100 * s, 46 * s, 125 * s, 58 * s, 150 * s, 52 * s);
+  ctx.bezierCurveTo(175 * s, 46 * s, 190 * s, 58 * s, 200 * s, 52 * s);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(100 * s, 30 * s, 13 * s, 0, Math.PI * 2);
+  ctx.stroke();
+
+  [
+    [28 * s, false],
+    [172 * s, true],
+  ].forEach(([tx, flip]) => {
+    const d = flip ? -1 : 1;
+    ctx.beginPath();
+    ctx.moveTo(tx, 52 * s);
+    ctx.lineTo(tx, 28 * s);
+    ctx.moveTo(tx, 28 * s);
+    ctx.bezierCurveTo(tx - d * 9 * s, 23 * s, tx - d * 14 * s, 25 * s, tx - d * 19 * s, 19 * s);
+    ctx.moveTo(tx, 28 * s);
+    ctx.bezierCurveTo(tx - d * 6 * s, 19 * s, tx - d * 4 * s, 13 * s, tx - d * 10 * s, 9 * s);
+    ctx.moveTo(tx, 28 * s);
+    ctx.bezierCurveTo(tx + d * 4 * s, 19 * s, tx + d * 10 * s, 17 * s, tx + d * 14 * s, 11 * s);
+    ctx.moveTo(tx, 28 * s);
+    ctx.bezierCurveTo(tx + d * 8 * s, 21 * s, tx + d * 14 * s, 23 * s, tx + d * 20 * s, 17 * s);
+    ctx.stroke();
+  });
+
+  ctx.restore();
+}
+
+function ggDrawTitleCanvas(title) {
+  const canvas = document.createElement("canvas");
+  canvas.width = GG_PDF_PAGE_W;
+  canvas.height = GG_PDF_PAGE_H;
+  const ctx = canvas.getContext("2d");
+  const grad = ctx.createLinearGradient(0, 0, 0, GG_PDF_PAGE_H);
+  grad.addColorStop(0, "#A6332E");
+  grad.addColorStop(1, "#7A2321");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, GG_PDF_PAGE_W, GG_PDF_PAGE_H);
+  ggDrawPageFrame(ctx, "rgba(255,255,255,0.35)");
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#D4A24C";
+  ctx.font = "600 34px 'Noto Sans JP', sans-serif";
+  ctx.fillText("BALI TOUR 2026", GG_PDF_PAGE_W / 2, GG_PDF_PAGE_H / 2 - 50);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "700 68px 'Noto Sans JP', sans-serif";
+  ctx.fillText(title, GG_PDF_PAGE_W / 2, GG_PDF_PAGE_H / 2 + 30);
+
+  ctx.font = "400 28px 'Noto Sans JP', sans-serif";
+  ctx.fillStyle = "rgba(255,255,255,.85)";
+  ctx.fillText(new Date().toLocaleDateString("ja-JP"), GG_PDF_PAGE_W / 2, GG_PDF_PAGE_H / 2 + 90);
+
+  ggDrawBaliMotif(ctx, GG_PDF_PAGE_W / 2, GG_PDF_PAGE_H * 0.24, 140, "rgba(212,162,76,0.55)");
+  ggDrawBaliMotif(ctx, GG_PDF_PAGE_W / 2, GG_PDF_PAGE_H * 0.78, 140, "rgba(212,162,76,0.55)");
+
+  return canvas;
+}
+
+function ggChunk(arr, size) {
+  const out = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
+
+function ggRoundRectPath(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+// 1件分を、与えられた枠(x,y,w,h)いっぱいに使って描く。余白が寂しくならないよう
+// まずカード状の背景を敷き、その中に写真・名前・タグのバッジ・ひとことを配置する。
+// 文字や写真の大きさは、枠の幅に合わせて自動的に拡大・縮小する
+async function ggDrawPostBlock(ctx, post, x, y, w, h) {
+  const mood = ggState.moodMap[post.mood] || {};
+  const tag = ggState.tagMap[post.meal_tag] || {};
+  const scale = Math.max(0.75, Math.min(1.4, w / 520));
+  const pad = Math.round(26 * scale);
+
+  ggRoundRectPath(ctx, x, y, w, h, 22);
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fill();
+  ctx.strokeStyle = "rgba(212,162,76,0.55)";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  const innerX = x + pad;
+  const innerW = w - pad * 2;
+  let cursorY = y + pad;
+
+  try {
+    const img = await ggLoadImageEl(post.photo_url);
+    const maxW = innerW;
+    const maxH = h * 0.6;
+    const ratio = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight);
+    const pw = img.naturalWidth * ratio;
+    const ph = img.naturalHeight * ratio;
+    const px = innerX + (innerW - pw) / 2;
+    const r = 16;
+    ctx.save();
+    ggRoundRectPath(ctx, px, cursorY, pw, ph, r);
+    ctx.clip();
+    ctx.drawImage(img, px, cursorY, pw, ph);
+    ctx.restore();
+    ggRoundRectPath(ctx, px, cursorY, pw, ph, r);
+    ctx.strokeStyle = "rgba(43,30,27,0.12)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    cursorY += ph + Math.round(28 * scale);
+  } catch (e) {
+    cursorY += 10;
+  }
+
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#2B1E1B";
+  ctx.font = "700 " + Math.round(28 * scale) + "px 'Noto Sans JP', sans-serif";
+  ctx.fillText((mood.emoji ? mood.emoji + "  " : "") + post.name, innerX, cursorY);
+  cursorY += Math.round(16 * scale);
+
+  // 「いつ食べた？」バッジ（薄いゴールドの丸ピル）
+  const badgeText = (tag.emoji ? tag.emoji + " " : "") + (tag.label || "");
+  if (badgeText.trim()) {
+    ctx.font = "700 " + Math.round(18 * scale) + "px 'Noto Sans JP', sans-serif";
+    const badgePad = Math.round(12 * scale);
+    const badgeW = ctx.measureText(badgeText).width + badgePad * 2;
+    const badgeH = Math.round(32 * scale);
+    cursorY += Math.round(10 * scale);
+    ggRoundRectPath(ctx, innerX, cursorY, badgeW, badgeH, badgeH / 2);
+    ctx.fillStyle = "#F4E9E2";
+    ctx.fill();
+    ctx.fillStyle = "#A6332E";
+    ctx.textBaseline = "middle";
+    ctx.fillText(badgeText, innerX + badgePad, cursorY + badgeH / 2 + 1);
+    ctx.textBaseline = "alphabetic";
+    cursorY += badgeH + Math.round(14 * scale);
+  }
+
+  ctx.fillStyle = "#7A645C";
+  ctx.font = "400 " + Math.round(18 * scale) + "px 'Noto Sans JP', sans-serif";
+  const metaLine = ggFormatTime(post.created_at) + (post.location ? "　@" + post.location : "");
+  ctx.fillText(metaLine, innerX, cursorY);
+  cursorY += Math.round(26 * scale);
+
+  if (post.caption) {
+    ctx.fillStyle = "#2B1E1B";
+    ctx.font = "400 " + Math.round(20 * scale) + "px 'Noto Sans JP', sans-serif";
+    const lineH = Math.round(27 * scale);
+    const remaining = Math.max(1, Math.floor((y + h - pad - cursorY) / lineH));
+    ggWrapCanvasText(ctx, post.caption, innerW).slice(0, remaining).forEach((line) => {
+      ctx.fillText(line, innerX, cursorY);
+      cursorY += lineH;
+    });
+  }
+}
+
+// 件数(1〜4件)に応じて、ページ内を無駄なく埋めるカードの配置を返す
+function ggGridRectsForCount(n, x, y, w, h, gap) {
+  if (n <= 1) return [[x, y, w, h]];
+  if (n === 2) {
+    const colW = (w - gap) / 2;
+    return [
+      [x, y, colW, h],
+      [x + colW + gap, y, colW, h],
+    ];
+  }
+  const colW = (w - gap) / 2;
+  const rowH = (h - gap) / 2;
+  if (n === 3) {
+    return [
+      [x, y, colW, rowH],
+      [x + colW + gap, y, colW, rowH],
+      [x, y + rowH + gap, w, rowH],
+    ];
+  }
+  return [
+    [x, y, colW, rowH],
+    [x + colW + gap, y, colW, rowH],
+    [x, y + rowH + gap, colW, rowH],
+    [x + colW + gap, y + rowH + gap, colW, rowH],
+  ];
+}
+
+// ページ上部の「バリ旅グラム」ヘッダーバーを描き、その下端のY座標を返す
+function ggDrawHeaderBar(ctx, margin) {
+  const barH = 90;
+  const bw = GG_PDF_PAGE_W - margin * 2;
+  ggRoundRectPath(ctx, margin, margin, bw, barH, 20);
+  const grad = ctx.createLinearGradient(margin, margin, margin + bw, margin);
+  grad.addColorStop(0, "#A6332E");
+  grad.addColorStop(1, "#7A2321");
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "700 36px 'Noto Sans JP', sans-serif";
+  ctx.fillText("バリ旅グラム", GG_PDF_PAGE_W / 2, margin + barH / 2 - 6);
+  ctx.font = "400 15px 'Noto Sans JP', sans-serif";
+  ctx.fillStyle = "rgba(255,255,255,.85)";
+  ctx.fillText("BALI TOUR 2026 ｜ グルメスクラップ", GG_PDF_PAGE_W / 2, margin + barH / 2 + 22);
+  ctx.textBaseline = "alphabetic";
+
+  return margin + barH + 30;
+}
+
+// 1ページに最大4件を2列×2行で並べ、旅の記録帳らしい密度に見せる。
+// 件数が4未満のページも、余白が寂しくならないようカードを大きく広げて埋める
+async function ggDrawPostsPageCanvas(posts) {
+  const canvas = document.createElement("canvas");
+  canvas.width = GG_PDF_PAGE_W;
+  canvas.height = GG_PDF_PAGE_H;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#FBF2E9";
+  ctx.fillRect(0, 0, GG_PDF_PAGE_W, GG_PDF_PAGE_H);
+  ggDrawPageFrame(ctx);
+
+  const margin = 70;
+  const gap = 30;
+  const contentTop = ggDrawHeaderBar(ctx, margin);
+  const usableW = GG_PDF_PAGE_W - margin * 2;
+  const usableH = GG_PDF_PAGE_H - margin - contentTop;
+
+  const rects = ggGridRectsForCount(posts.length, margin, contentTop, usableW, usableH, gap);
+  for (let i = 0; i < posts.length; i++) {
+    const [rx, ry, rw, rh] = rects[i];
+    await ggDrawPostBlock(ctx, posts[i], rx, ry, rw, rh);
+  }
+
+  return canvas;
+}
+
+async function ggBuildPdf(posts, title) {
+  await ggLoadPdfLib();
+  if (document.fonts && document.fonts.ready) await document.fonts.ready;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+
+  const titleCanvas = ggDrawTitleCanvas(title);
+  doc.addImage(titleCanvas.toDataURL("image/jpeg", 0.9), "JPEG", 0, 0, pageW, pageH);
+
+  for (const pagePosts of ggChunk(posts, 4)) {
+    doc.addPage();
+    const canvas = await ggDrawPostsPageCanvas(pagePosts);
+    doc.addImage(canvas.toDataURL("image/jpeg", 0.88), "JPEG", 0, 0, pageW, pageH);
+  }
+
+  return doc;
+}
+
+// ブラウザ純正のPDFビューアには「戻る」ボタンを追加できないため、
+// 開いたタブの中に「← 戻る」ボタン付きの簡単な枠を用意し、その中にPDFを表示する。
+// 「戻る」はこのタブ自体を閉じる動作にすることで、初めての人でも迷わず操作できるようにする
+function ggIsMobileUA() {
+  return /iPhone|iPad|iPod|Android|Mobi/i.test(navigator.userAgent);
+}
+
+function ggOpenPdfPreview(win, blobUrl, filename) {
+  // スマホでは、独自の枠(iframe)でPDFを埋め込むと表示が崩れる・画像が出ないことがあるため、
+  // 端末が持っている標準のPDF表示にそのまま任せる（この方法は動作確認済み）
+  if (ggIsMobileUA()) {
+    win.location = blobUrl;
+    return;
+  }
+
+  const escapedTitle = ggEscapeHtml(filename);
+  const html =
+    "<!doctype html><html lang='ja'><head><meta charset='utf-8'>" +
+    "<meta name='viewport' content='width=device-width, initial-scale=1'>" +
+    "<title>" + escapedTitle + "</title>" +
+    "<style>" +
+    "html,body{margin:0;padding:0;height:100%;background:#2B211D;font-family:-apple-system,'Hiragino Sans','Yu Gothic','Segoe UI',sans-serif;}" +
+    ".gg-pdf-bar{display:flex;align-items:center;gap:12px;padding:10px 14px;background:linear-gradient(135deg,#C74B3F,#7A2321);flex-wrap:wrap;}" +
+    ".gg-pdf-bar button{border:none;border-radius:999px;padding:10px 18px;font-weight:700;font-size:.92rem;background:#fff;color:#A6332E;cursor:pointer;}" +
+    ".gg-pdf-bar a{color:#fff;font-size:.82rem;text-decoration:underline;}" +
+    ".gg-pdf-bar span{color:#fff;font-size:.8rem;opacity:.85;}" +
+    "iframe{width:100%;height:calc(100% - 54px);border:none;display:block;background:#fff;}" +
+    "</style></head><body>" +
+    "<div class='gg-pdf-bar'>" +
+    "<button id='gg-pdf-back' type='button'>← バリ旅グラムに戻る</button>" +
+    "<span>保存が終わったら押してください</span>" +
+    "<a id='gg-pdf-dl' download='" + escapedTitle + "'>うまく表示されない場合はこちら（ダウンロード）</a>" +
+    "</div>" +
+    "<iframe src='" + blobUrl + "'></iframe>" +
+    "<script>document.getElementById('gg-pdf-back').addEventListener('click', function(){ window.close(); });</" + "script>" +
+    "</body></html>";
+
+  win.document.open();
+  win.document.write(html);
+  win.document.close();
+  const dlLink = win.document.getElementById("gg-pdf-dl");
+  if (dlLink) dlLink.href = blobUrl;
+}
+
+async function ggSavePdf(scope) {
+  const btn = document.getElementById(scope === "mine" ? "gg-save-mine-btn" : "gg-save-all-btn");
+  const originalText = btn.textContent;
+
+  const deviceId = ggDeviceId();
+  const posts = scope === "mine" ? ggState.posts.filter((p) => p.device_id === deviceId) : ggState.posts;
+  if (posts.length === 0) {
+    window.alert("保存できる投稿がまだありません。");
+    return;
+  }
+
+  // タップした直後（PDF作成が終わる前）に空のタブを開いておき、完成したPDFを
+  // そのタブへ表示する。バリ旅グラムのタブ自体は残るので、タブを切り替えれば戻れる
+  const previewWindow = window.open("", "_blank");
+
+  // スマホはPDFが開いた瞬間にそちらのタブへ切り替わってしまい、あとから案内を
+  // 出しても気づいてもらえないため、保存ボタンを押した直後（作成中）に先に案内を出しておく
+  document.getElementById("gg-save-guide").classList.remove("hidden");
+
+  btn.disabled = true;
+  btn.textContent = "作成中…（写真の枚数によって少し時間がかかります）";
+  try {
+    const sorted = posts.slice().sort((a, b) => a.created_at - b.created_at);
+    const doc = await ggBuildPdf(sorted, "バリ旅deごちそうさま！");
+    const filename = scope === "mine" ? "バリ旅deごちそうさま_わたしの記録.pdf" : "バリ旅deごちそうさま_みんなの記録.pdf";
+    doc.setProperties({ title: filename });
+    const blobUrl = doc.output("bloburl");
+    // previewWindowへの書き込みが何らかの理由で失敗した場合も、その場でダウンロードする
+    // 従来の方法に自動で切り替わるようにしておく（保存自体が失敗しないようにするため）
+    let previewOk = false;
+    if (previewWindow && !previewWindow.closed) {
+      try {
+        ggOpenPdfPreview(previewWindow, blobUrl, filename);
+        previewOk = true;
+      } catch (e) {
+        previewOk = false;
+      }
+    }
+    if (!previewOk) {
+      if (previewWindow && !previewWindow.closed) previewWindow.close();
+      doc.save(filename);
+    }
+  } catch (e) {
+    if (previewWindow) previewWindow.close();
+    document.getElementById("gg-save-guide").classList.add("hidden");
+    window.alert("PDFの作成に失敗しました。通信環境の良い場所でもう一度お試しください。");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
 // --- Chapter 9: 持ち物チェックリスト（ローカル保存対応） ---
 const CHECKLIST_STORAGE_KEY = "baliTour2026_checklist";
 
@@ -1165,6 +2045,7 @@ function renderAllChapters(data) {
   renderFAQ(data);
   renderLineChapter(data);
   renderRestaurants(data);
+  initGourmetGram(data);
   renderEnding(data);
   buildChapterMenu(data);
   addFavoriteStarsToChapterPages(data);
@@ -1721,6 +2602,7 @@ function setupNavigationEvents() {
   document.getElementById("btn-autoplay").addEventListener("click", toggleAutoplay);
   document.getElementById("btn-fullscreen").addEventListener("click", toggleFullscreen);
   document.getElementById("btn-today-schedule").addEventListener("click", goToTodaySchedule);
+  document.getElementById("btn-gourmet-gram-shortcut").addEventListener("click", goToGourmetGram);
   document.getElementById("btn-lucky-opa-itinerary").addEventListener("click", (event) => {
     const line = state.data.lineChapter;
     const btn = event.currentTarget;
@@ -1744,6 +2626,12 @@ function setupNavigationEvents() {
   document.getElementById("btn-close-checklist-complete").addEventListener("click", closeChecklistCompletePopup);
   document.getElementById("checklist-complete-popup").addEventListener("click", (event) => {
     if (event.target.id === "checklist-complete-popup") closeChecklistCompletePopup();
+  });
+  document.getElementById("gg-save-guide-close").addEventListener("click", () => {
+    document.getElementById("gg-save-guide").classList.add("hidden");
+  });
+  document.getElementById("gg-save-guide").addEventListener("click", (event) => {
+    if (event.target.id === "gg-save-guide") document.getElementById("gg-save-guide").classList.add("hidden");
   });
 
 
@@ -1819,6 +2707,10 @@ function resetOpeningVisuals() {
 
 function setupOpeningEntry() {
   document.getElementById("btn-start-experience").addEventListener("click", enterMainApp);
+  document.getElementById("btn-start-gourmet-gram").addEventListener("click", () => {
+    enterMainApp();
+    goToGourmetGram();
+  });
 }
 
 // topbar・shortcut-barの実際の高さをCSS変数に反映する。

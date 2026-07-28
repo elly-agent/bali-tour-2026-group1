@@ -137,6 +137,7 @@
       <p class="opening-title-sub" id="opening-title-sub"></p>
       <p class="opening-title-sub2" id="opening-title-sub2"></p>
       <button class="btn-primary" id="btn-start-experience">あなたの旅を開く</button>
+      <button class="btn-secondary opening-gourmet-gram-btn" id="btn-start-gourmet-gram" type="button">📸 バリ旅グラムを開く</button>
     </div>
   </div>
 </div>
@@ -187,6 +188,10 @@
     <button class="shortcut-pill shortcut-pill--weather" id="btn-weather-shortcut" type="button" title="天気・時間を見る">
       <span class="shortcut-pill-icon">🌤️</span>
       <span class="shortcut-pill-text">天気・時間</span>
+    </button>
+    <button class="shortcut-pill shortcut-pill--gourmet-gram" id="btn-gourmet-gram-shortcut" type="button" title="バリ旅グラムを開く">
+      <span class="shortcut-pill-icon">📸</span>
+      <span class="shortcut-pill-text">バリ旅グラム</span>
     </button>
   </div>
 
@@ -603,8 +608,99 @@
         </div>
       </section>
 
+      <!-- ============ Chapter 22: バリ旅グラム ============ -->
+      <section class="slide" data-chapter="22" data-type="gourmet-gram" id="slide-22">
+        <div class="slide-scroll">
+        <div class="slide-inner reveal-group gg">
+          <p class="chapter-eyebrow reveal">Chapter 22</p>
+          <h2 class="chapter-title reveal" data-bind="chapterTitle:gourmet-gram"></h2>
+          <p class="chapter-lead reveal" data-bind="gourmetGram.lead"></p>
+
+          <svg class="gg-deco-illustration reveal" viewBox="0 0 200 60" aria-hidden="true">
+            <path d="M0 52 Q25 46 50 52 T100 52 T150 52 T200 52" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="100" cy="30" r="13" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M28 52 L28 28 M28 28 C19 23 14 25 9 19 M28 28 C22 19 24 13 18 9 M28 28 C32 19 38 17 42 11 M28 28 C36 21 42 23 48 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M172 52 L172 28 M172 28 C163 23 158 25 153 19 M172 28 C166 19 168 13 162 9 M172 28 C176 19 182 17 186 11 M172 28 C180 21 186 23 192 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+
+          <section class="gg-composer reveal" id="gg-composer">
+            <div id="gg-photo-name-group">
+              <div class="gg-coach-anchor" id="gg-photo-coach-anchor">
+                <label class="gg-photo-drop" id="gg-photo-drop">
+                  <div class="gg-photo-drop-icon" id="gg-photo-drop-icon">📷</div>
+                  <span class="gg-photo-drop-text" id="gg-photo-drop-text">撮影 または ライブラリから選ぶ</span>
+                  <input type="file" accept="image/*" id="gg-photo-input">
+                </label>
+                <span class="gg-coach-bubble" id="gg-photo-coach-bubble" style="bottom:76px; left:50%; transform:translateX(-50%);">①まずは写真をタップ！</span>
+                <span class="gg-coach-finger" id="gg-photo-coach-finger" style="bottom:22px; left:50%; margin-left:-19px;">👆</span>
+              </div>
+
+              <div class="gg-popup-card hidden" id="gg-brightness-popup">
+                <p class="gg-popup-title">📸 写真、明るくしてみる？</p>
+                <p class="gg-popup-sub">スライダーを動かすだけで、上の写真がパッと明るくなります</p>
+                <div class="gg-brightness-row">
+                  <span>🌙</span>
+                  <input class="gg-brightness-slider" type="range" min="0" max="100" value="50" id="gg-brightness-slider">
+                  <span>☀️</span>
+                </div>
+                <div class="gg-popup-btn-row">
+                  <button class="gg-popup-btn secondary" type="button" id="gg-brightness-skip">これでOK！</button>
+                  <button class="gg-popup-btn primary" type="button" id="gg-brightness-apply">明るくする</button>
+                </div>
+              </div>
+
+              <input class="gg-field-input gg-field-input--name" type="text" id="gg-name-input" placeholder="ここにお名前入力" maxlength="20">
+            </div>
+
+            <p class="gg-editing-label hidden" id="gg-editing-label"></p>
+
+            <p class="gg-mood-label">今の気持ちを選んでね（毎回のプロフ写真の代わりになります）</p>
+            <div class="gg-mood-row" id="gg-mood-row"></div>
+
+            <p class="gg-tag-label">いつ食べたか選んでね</p>
+            <div class="gg-tag-row" id="gg-tag-row"></div>
+
+            <input class="gg-field-input" type="text" id="gg-location-input" placeholder="どこで食べたか入力" maxlength="40">
+            <textarea class="gg-field-textarea" id="gg-caption-input" placeholder="一言オパで入力♪" maxlength="200"></textarea>
+
+            <p class="gg-composer-error hidden" id="gg-composer-error"></p>
+            <button class="gg-btn-post" type="button" id="gg-submit-btn">投稿する</button>
+            <button class="gg-btn-cancel-edit hidden" type="button" id="gg-cancel-edit-btn">編集をやめる</button>
+          </section>
+
+          <h3 class="gg-timeline-title reveal">グルメタイムライン</h3>
+          <div class="gg-timeline" id="gg-timeline"></div>
+          <p class="gg-timeline-empty hidden" id="gg-timeline-empty">まだ投稿がありません。最初のグルメ投稿をしてみましょう！</p>
+
+          <section class="gg-final-save reveal">
+            <h2 class="gg-final-save-title">旅の思い出を保存しよう</h2>
+            <p class="gg-final-save-lead">～バリ旅ぐらむスクラップ～</p>
+            <p class="gg-final-save-tagline">旅の記念・お土産にどうぞ。</p>
+
+            <div class="gg-save-card">
+              <div class="gg-save-card-icon">📕</div>
+              <p class="gg-save-card-eyebrow">自分の投稿</p>
+              <h3 class="gg-save-card-title" data-bind="gourmetGram.saveMineTitle"></h3>
+              <p class="gg-save-card-desc" data-bind="gourmetGram.saveMineDesc"></p>
+              <button class="gg-save-card-btn green" type="button" id="gg-save-mine-btn">自分の思い出をPDFで保存する</button>
+            </div>
+
+            <div class="gg-save-card">
+              <div class="gg-save-card-icon">📗</div>
+              <p class="gg-save-card-eyebrow">みんなの投稿</p>
+              <h3 class="gg-save-card-title" data-bind="gourmetGram.saveAllTitle"></h3>
+              <p class="gg-save-card-desc" data-bind="gourmetGram.saveAllDesc"></p>
+              <button class="gg-save-card-btn gold" type="button" id="gg-save-all-btn">みんなの思い出をPDFで保存する</button>
+            </div>
+
+            <p class="gg-save-deadline-note" data-bind="gourmetGram.saveDeadlineNote"></p>
+          </section>
+        </div>
+        </div>
+      </section>
+
       <!-- ============ エンディング ============ -->
-      <section class="slide slide--ending" data-chapter="22" data-type="ending" id="slide-22">
+      <section class="slide slide--ending" data-chapter="23" data-type="ending" id="slide-23">
         <div class="slide-scroll">
         <div class="ending-sun" aria-hidden="true"></div>
         <div class="ending-plane" aria-hidden="true">✈️</div>
@@ -623,6 +719,27 @@
 
   <!-- ラッキーオパのボタンを押した時に、画面にふわっとかかる透明感のある虹エフェクト -->
   <div class="rainbow-overlay" id="rainbow-overlay" aria-hidden="true"></div>
+
+  <!-- PDF保存後、新しいタブに開いたPDFをどう保存すればいいか案内するポップアップ -->
+  <div class="gg-save-guide hidden" id="gg-save-guide">
+    <div class="gg-save-guide-panel">
+      <p class="gg-save-guide-title">📄 別のタブでPDFが開きました</p>
+      <div class="gg-save-guide-step">
+        <span class="gg-save-guide-step-icon">📱</span>
+        <span class="gg-save-guide-step-text"><b>iPhoneの方</b><br>新しいタブの画面上にある共有マーク(四角に↑)をタップ→「"ファイル"に保存」を選んでください</span>
+      </div>
+      <div class="gg-save-guide-step">
+        <span class="gg-save-guide-step-icon">🤖</span>
+        <span class="gg-save-guide-step-text"><b>Androidの方</b><br>新しいタブの画面上にあるダウンロードマーク(↓)をタップしてください</span>
+      </div>
+      <div class="gg-save-guide-step">
+        <span class="gg-save-guide-step-icon">💻</span>
+        <span class="gg-save-guide-step-text"><b>パソコンの方</b><br>画面の右クリックではなく、PDF画面の上のほうにあるツールバーの中の「保存」アイコン(フロッピーディスクのような絵)を押してください</span>
+      </div>
+      <p class="gg-save-guide-note">保存が終わったら、パソコンの方は画面上の「← バリ旅グラムに戻る」ボタンを、スマホの方は端末の「戻る」操作でこの画面に戻ってきてくださいね</p>
+      <button class="btn-primary" id="gg-save-guide-close" type="button">わかった！</button>
+    </div>
+  </div>
 
   <!-- 持ち物チェックが全部そろった時に表示する、お祝いポップアップ -->
   <div class="checklist-complete-popup hidden" id="checklist-complete-popup">
