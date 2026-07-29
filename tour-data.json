@@ -80,6 +80,7 @@
   ],
 
   "gourmetGram": {
+    "tagline": "あなたが選んだ、バリの美味しい食べ物を投稿してね！",
     "lead": "投稿は自動でみんなの画面に反映されます（約30〜60秒ごとに更新）",
     "moods": [
       { "id": "expect", "emoji": "✨", "label": "期待！" },
@@ -101,7 +102,7 @@
     "saveMineDesc": "バリ旅で食べたものをPDFにします。",
     "saveAllTitle": "バリ旅deごちそうさま！保存",
     "saveAllDesc": "みんなの美味しい！集合写真をＰＤＦにします。",
-    "saveDeadlineNote": "※保存する方は年内にお願いします。"
+    "saveDeadlineNote": "保存する方は旅が終わったら２０２６年内にお願いします。"
   },
 
   "worldMap": {
